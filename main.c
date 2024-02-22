@@ -23,18 +23,13 @@ long getFileSize(FILE *file) {
 }
 
 void renderGrid(C8_CPU_State *state, SDL_Renderer *renderer) {
-    printf("Start\n");
     for (int x = 0; x < SCREEN_WIDTH; x += GRID_SIZE) {
         for (int y = 0; y < SCREEN_HEIGHT; y += GRID_SIZE) {
-//            if(x >= SCREEN_WIDTH / GRID_SIZE / 10) continue;
-//            if(y >= SCREEN_HEIGHT / GRID_SIZE / 10) continue;
 
             int xOffset = x / 10;
             int yOffset = y / 10;
 
-//            printf("%d, %d\n", x, y);
-
-            if(state->display[yOffset][xOffset]) {
+            if (state->display[yOffset][xOffset]) {
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set color to black
             } else {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set color to white
@@ -45,13 +40,35 @@ void renderGrid(C8_CPU_State *state, SDL_Renderer *renderer) {
     }
 }
 
+char fontArray[] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
+
 int main() {
     FILE *file;
     char *buffer;
     long fileLength;
 
     // Open the file in binary read mode
-    file = fopen("ibm_logo.c8", "rb");
+//    file = fopen("ibm_logo.c8", "rb");
+    file = fopen("test_opcode.ch8", "rb");
+//    file = fopen("BC_test.ch8", "rb");
+//    file = fopen("3-corax+.ch8", "rb");
     if (file == NULL) {
         perror("Error opening file");
         return 1;
@@ -61,7 +78,7 @@ int main() {
     fileLength = getFileSize(file);
 
     // Allocate memory for the buffer to store file contents
-    buffer = (char *)malloc(fileLength);
+    buffer = (char *) malloc(fileLength);
     if (buffer == NULL) {
         perror("Memory allocation failed");
         fclose(file);
@@ -75,6 +92,7 @@ int main() {
     fclose(file);
 
     C8_CPU_State cpu_state;
+    C8_load_font(&cpu_state, &fontArray, sizeof(fontArray));
     C8_load_program(&cpu_state, buffer, fileLength);
 
     SDL_Window *window;

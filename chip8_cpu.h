@@ -11,10 +11,9 @@ typedef struct {
     int16_t programCounter;
 
     int16_t index;
-    // Assuming ArrayDeque is a dynamic array structure
-    // You may need to implement it separately in C
-    int16_t* stack;
-    int16_t stack_capacity; // Capacity of the stack
+
+    int16_t stack[16];
+    int8_t stackIndex;
 
     uint8_t delayTimer;
     uint8_t soundTimer;
@@ -24,6 +23,7 @@ typedef struct {
     uint8_t display[32][64];
 } C8_CPU_State;
 
+void C8_load_font(C8_CPU_State *state, char *font, char size);
 void C8_load_program(C8_CPU_State* state, char* program, int programSize);
 void C8_execute_program(C8_CPU_State* state);
 
