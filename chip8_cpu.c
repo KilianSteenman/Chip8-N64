@@ -20,8 +20,10 @@ short C8_get_next_opcode(C8_CPU_State *state) {
 
 void C8_opcode_00E0_clear_screen(C8_CPU_State *state) {
     printf("Clear screen\n");
-    for(int i = 0; i < 64 * 32; i++) {
-        state->display[i] = 0;
+    for(int y = 0; y < 32; y++) {
+        for(int x = 0; x < 64; x++) {
+            state->display[y][x] = 0;
+        }
     }
 }
 
@@ -32,14 +34,14 @@ void C8_opcode_1XXX_set_pc(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_6XXX_set_register(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) > 2;
+    char reg = (opcode & 0x0F00) >> 8;
     char value = opcode & 0x00FF;
     printf("Set reg %d to %d\n", reg, value);
     state->registers[reg] = value;
 }
 
 void C8_opcode_7XXX_add_value_to_register(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) > 2;
+    char reg = (opcode & 0x0F00) >> 8;
     char value = opcode & 0x00FF;
     state->registers[reg] += value;
     printf("Add %d to reg %d result %d\n", reg, value, state->registers[reg]);
@@ -52,23 +54,21 @@ void C8_opcode_AXXX_set_index(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
-    char rowCount = opcode & 0x000F;
+    char sprite_height = opcode & 0x000F;
+    char x = state->registers[(opcode & 0x0100) >> 8] % 64;
+    char y = state->registers[(opcode & 0x0010) >> 4] % 32;
+    char pixel;
 
     state->registers[0xF] = 0;
 
-    char x = state->registers[(opcode & 0x0100) >> 3] % 64;
-    char y = state->registers[(opcode & 0x0010) >> 2] % 32;
-    for(int rowIndex = 0; rowIndex < rowCount || rowIndex >= 32; rowIndex++) {
-        char sprite = state->memory[state->index + rowIndex];
-        for(int columnIndex = 0; columnIndex < 8 || columnIndex + y >= 64; columnIndex++) {
-            if(((sprite >> columnIndex) & 0x1) == 1) {
-                short coordIndex = rowIndex * 64 + (y + columnIndex);
-                if(state->display[coordIndex] == 1) {
-                    state->display[coordIndex] = 0;
+    for (int y_coordinate = 0; y_coordinate < sprite_height; y_coordinate++) {
+        pixel = state->memory[state->index + y_coordinate];
+        for (int x_coordinate = 0; x_coordinate < 8; x_coordinate++) {
+            if ((pixel & (0x80 >> x_coordinate)) != 0) {
+                if (state->display[y + y_coordinate][x + x_coordinate] == 1) {
                     state->registers[0xF] = 1;
-                } else {
-                    state->display[coordIndex] = 1;
                 }
+                state->display[y + y_coordinate][x + x_coordinate] ^= 1;
             }
         }
     }

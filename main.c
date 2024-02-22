@@ -4,7 +4,7 @@
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 320
-#define GRID_SIZE 10 // Size of each grid cell
+#define GRID_SIZE 1 // Size of each grid cell
 
 // Function to get the size of a file
 long getFileSize(FILE *file) {
@@ -23,15 +23,24 @@ long getFileSize(FILE *file) {
 }
 
 void renderGrid(C8_CPU_State *state, SDL_Renderer *renderer) {
+    printf("Start\n");
     for (int x = 0; x < SCREEN_WIDTH; x += GRID_SIZE) {
         for (int y = 0; y < SCREEN_HEIGHT; y += GRID_SIZE) {
-            if(state->display[(((SCREEN_WIDTH / GRID_SIZE) * (y / GRID_SIZE)) + (x / GRID_SIZE))]) {
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Set color to white
+//            if(x >= SCREEN_WIDTH / GRID_SIZE / 10) continue;
+//            if(y >= SCREEN_HEIGHT / GRID_SIZE / 10) continue;
+
+            int xOffset = x / 10;
+            int yOffset = y / 10;
+
+//            printf("%d, %d\n", x, y);
+
+            if(state->display[yOffset][xOffset]) {
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set color to black
             } else {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set color to white
             }
             SDL_Rect rect = {x, y, GRID_SIZE, GRID_SIZE};
-            SDL_RenderDrawRect(renderer, &rect); // Draw grid cell
+            SDL_RenderFillRect(renderer, &rect); // Draw grid cell
         }
     }
 }

@@ -21,7 +21,7 @@ typedef struct {
     uint8_t registers[16];
     uint8_t memory[4096];
 
-    uint8_t display[64*32];
+    uint8_t display[32][64];
 } C8_CPU_State;
 
 void C8_load_program(C8_CPU_State* state, char* program, int programSize);
