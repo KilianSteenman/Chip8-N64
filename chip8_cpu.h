@@ -24,7 +24,8 @@ typedef struct {
 } C8_CPU_State;
 
 void C8_load_font(C8_CPU_State *state, char *font, char size);
-void C8_load_program(C8_CPU_State* state, char* program, int programSize);
+void C8_load_program(C8_CPU_State *state, char *program, int programSize);
+void C8_clear_screen(C8_CPU_State *state);
 void C8_execute_program(C8_CPU_State* state);
 
 #endif //CHIP_8_CHIP8_H

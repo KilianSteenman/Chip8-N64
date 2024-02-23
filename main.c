@@ -66,6 +66,7 @@ int main() {
 
     // Open the file in binary read mode
 //    file = fopen("ibm_logo.c8", "rb");
+//    file = fopen("c8_test.c8", "rb");
 //    file = fopen("test_opcode.ch8", "rb");
 //    file = fopen("BC_test.ch8", "rb");
     file = fopen("3-corax+.ch8", "rb");
@@ -92,6 +93,7 @@ int main() {
     fclose(file);
 
     C8_CPU_State cpu_state;
+    C8_clear_screen(&cpu_state);
     C8_load_font(&cpu_state, &fontArray, sizeof(fontArray));
     C8_load_program(&cpu_state, buffer, fileLength);
 

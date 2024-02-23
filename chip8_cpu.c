@@ -20,6 +20,14 @@ void C8_load_program(C8_CPU_State *state, char *program, int programSize) {
     state->programCounter = PROGRAM_OFFSET;
 }
 
+void C8_clear_screen(C8_CPU_State *state) {
+    for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 64; x++) {
+            state->display[y][x] = 0;
+        }
+    }
+}
+
 short C8_get_next_opcode(C8_CPU_State *state) {
     return (state->memory[state->programCounter++] << 8) | (state->memory[state->programCounter++] << 0);
 }
@@ -33,12 +41,7 @@ short C8_pop_stack(C8_CPU_State *state) {
 }
 
 void C8_opcode_00E0_clear_screen(C8_CPU_State *state) {
-//    printf("Clear screen\n");
-    for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 64; x++) {
-            state->display[y][x] = 0;
-        }
-    }
+    C8_clear_screen(state);
 }
 
 void C8_opcode_00EE_subroutine_return(C8_CPU_State *state) {
@@ -47,13 +50,11 @@ void C8_opcode_00EE_subroutine_return(C8_CPU_State *state) {
 
 void C8_opcode_1XXX_set_pc(C8_CPU_State *state, short opcode) {
     short pc = opcode & 0x0FFF;
-//    printf("Set pc: %d\n", pc);
     state->programCounter = pc;
 }
 
 void C8_opcode_2XXX_subroutine(C8_CPU_State *state, short opcode) {
     short pc = opcode & 0x0FFF;
-//    printf("Set pc: %d\n", pc);
     C8_push_stack(state);
     state->programCounter = pc;
 }
@@ -89,7 +90,6 @@ void C8_opcode_5XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
 void C8_opcode_6XXX_set_register(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
-//    printf("Set reg %d to %d\n", reg, value);
     state->registers[reg] = value;
 }
 
@@ -97,7 +97,13 @@ void C8_opcode_7XXX_add_value_to_register(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
     state->registers[reg] += value;
-//    printf("Add %d to reg %d result %d\n", reg, value, state->registers[reg]);
+}
+
+void C8_opcode_8XX0_set(C8_CPU_State *state, short opcode) {
+    char regX = (opcode & 0x0F00) >> 8;
+    char regY = (opcode & 0x00F0) >> 4;
+
+    state->registers[regX] = state->registers[regY];
 }
 
 void C8_opcode_8XX1_or(C8_CPU_State *state, short opcode) {
@@ -128,6 +134,17 @@ void C8_opcode_8XX3_xor(C8_CPU_State *state, short opcode) {
     uint8_t valueY = state->registers[regY];
 
     state->registers[regX] = valueX ^ valueY;
+}
+
+void C8_opcode_8XX4_add(C8_CPU_State *state, short opcode) {
+    char regX = (opcode & 0x0F00) >> 8;
+    char regY = (opcode & 0x00F0) >> 4;
+
+    uint8_t valueX = state->registers[regX];
+    uint8_t valueY = state->registers[regY];
+
+    state->registers[regX] = valueX + valueY;
+    state->registers[0xF] = state->registers[regX] < valueX;
 }
 
 void C8_opcode_8XX5_subtract(C8_CPU_State *state, short opcode) {
@@ -196,7 +213,19 @@ void C8_opcode_9XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
 void C8_opcode_AXXX_set_index(C8_CPU_State *state, short opcode) {
     short value = opcode & 0x0FFF;
     state->index = value;
-//    printf("Set index to %d\n", value);
+}
+
+void C8_opcode_BXXX_jump_with_offset(C8_CPU_State *state, short opcode) {
+    short value = opcode & 0x0FFF;
+    state->programCounter = value + state->registers[0];
+}
+
+void C8_opcode_CXXX_random(C8_CPU_State *state, short opcode) {
+    uint8_t regX = opcode & 0x0F00 >> 8;
+    uint8_t value = opcode & 0x00FF;
+
+    uint8_t random = rand();
+    state->registers[regX] = random & value;
 }
 
 void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
@@ -288,12 +317,16 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
         C8_opcode_6XXX_set_register(state, opcode);
     } else if ((opcode & 0xF000) == 0x7000) {
         C8_opcode_7XXX_add_value_to_register(state, opcode);
+    } else if ((opcode & 0xF00F) == 0x8000) {
+        C8_opcode_8XX0_set(state, opcode);
     } else if ((opcode & 0xF00F) == 0x8001) {
         C8_opcode_8XX1_or(state, opcode);
     } else if ((opcode & 0xF00F) == 0x8002) {
         C8_opcode_8XX2_and(state, opcode);
     } else if ((opcode & 0xF00F) == 0x8003) {
         C8_opcode_8XX3_xor(state, opcode);
+    } else if ((opcode & 0xF00F) == 0x8004) {
+        C8_opcode_8XX4_add(state, opcode);
     } else if ((opcode & 0xF00F) == 0x8005) {
         C8_opcode_8XX5_subtract(state, opcode);
     } else if ((opcode & 0xF00F) == 0x8006) {
@@ -306,6 +339,10 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
         C8_opcode_9XXX_skip_conditionally(state, opcode);
     } else if ((opcode & 0xF000) == 0xA000) {
         C8_opcode_AXXX_set_index(state, opcode);
+    } else if ((opcode & 0xF000) == 0xB000) {
+        C8_opcode_BXXX_jump_with_offset(state, opcode);
+    } else if ((opcode & 0xF000) == 0xC000) {
+        C8_opcode_CXXX_random(state, opcode);
     } else if ((opcode & 0xF000) == 0xD000) {
         C8_opcode_DXXX_display(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF015) {
