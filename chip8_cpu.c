@@ -239,21 +239,31 @@ void C8_opcode_FX33_bin_dec(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
     uint8_t value = state->registers[reg];
 
-    state->memory[state->index] = (value / 100);
-    state->memory[state->index + 1] = (value / 10 % 10);
-    state->memory[state->index + 2] = (value % 100 % 10);
+    uint8_t p1 = (value / 100);
+    uint8_t p2 = (value / 10 % 10);
+    uint8_t p3 = (value % 100 % 10);
+
+    printf("Value %d, %d %d %d\n", value, p1, p2, p3);
+
+    state->memory[state->index] = p1;
+    state->memory[state->index + 1] = p2;
+    state->memory[state->index + 2] = p3;
 }
 
 void C8_opcode_FX55_store_mem(C8_CPU_State *state, short opcode) {
     char count = (opcode & 0x0F00) >> 8;
-    for(int i = 0; i < count; i++) {
+    printf("Storing %d\n", count);
+    for(int i = 0; i <= count; i++) {
+        printf("Store[%d] %d into %d\n", i, state->registers[i], (state->index + 1));
         state->memory[state->index + i] = state->registers[i];
     }
 }
 
 void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
     char count = (opcode & 0x0F00) >> 8;
-    for(int i = 0; i < count; i++) {
+    printf("Reading %d\n", count);
+    for(int i = 0; i <= count; i++) {
+        printf("Read[%d] %d\n", i, state->memory[state->index + i]);
         state->registers[i] = state->memory[state->index + i];
     }
 }
