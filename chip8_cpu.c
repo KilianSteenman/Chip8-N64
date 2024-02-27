@@ -20,12 +20,18 @@ void C8_load_program(C8_CPU_State *state, char *program, int programSize) {
     state->programCounter = PROGRAM_OFFSET;
 }
 
+void C8_init(C8_CPU_State *state) {
+    memset(state->registers, 0, sizeof(state->registers));
+    memset(state->memory, 0, sizeof(state->memory));
+    memset(state->stack, 0, sizeof(state->stack));
+    memset(state->display, 0, sizeof(state->display));
+    memset(state->keys, 0, sizeof(state->keys));
+
+    state->delayTimer = 60;
+}
+
 void C8_clear_screen(C8_CPU_State *state) {
-    for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 64; x++) {
-            state->display[y][x] = 0;
-        }
-    }
+    memset(state->display, 0, sizeof(state->display));
 }
 
 short C8_get_next_opcode(C8_CPU_State *state) {
@@ -33,12 +39,10 @@ short C8_get_next_opcode(C8_CPU_State *state) {
 }
 
 void C8_push_stack(C8_CPU_State *state) {
-    printf("Pushing %d at stack index %d\n", state->programCounter, state->stackIndex);
     state->stack[state->stackIndex++] = state->programCounter;
 }
 
 short C8_pop_stack(C8_CPU_State *state) {
-    printf("Popping %d from stack index %d\n", state->stack[state->stackIndex - 1], state->stackIndex);
     return state->stack[--state->stackIndex];
 }
 
@@ -252,6 +256,25 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
     }
 }
 
+void C8_opcode_EX9E_is_key_pressed(C8_CPU_State *state, short opcode) {
+    char reg = (opcode & 0x0F00) >> 8;
+    if(state->keys[reg] == 1) {
+        state->programCounter += 2;
+    }
+}
+
+void C8_opcode_EXA1_is_key_not_pressed(C8_CPU_State *state, short opcode) {
+    char reg = (opcode & 0x0F00) >> 8;
+    if(state->keys[reg] == 0) {
+        state->programCounter += 2;
+    }
+}
+
+void C8_opcode_FX07_store_delay_timer(C8_CPU_State *state, short opcode) {
+    char reg = (opcode & 0x0F00) >> 8;
+    state->registers[reg] = state->delayTimer;
+}
+
 void C8_opcode_FX15_set_delay_timer(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
     state->delayTimer = state->registers[reg];
@@ -348,6 +371,12 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
         C8_opcode_CXXX_random(state, opcode);
     } else if ((opcode & 0xF000) == 0xD000) {
         C8_opcode_DXXX_display(state, opcode);
+    } else if ((opcode & 0xF0FF) == 0xE09E) {
+        C8_opcode_EX9E_is_key_pressed(state, opcode);
+    } else if ((opcode & 0xF0FF) == 0xE0A1) {
+        C8_opcode_EXA1_is_key_not_pressed(state, opcode);
+    } else if ((opcode & 0xF0FF) == 0xF007) {
+        C8_opcode_FX07_store_delay_timer(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF015) {
         C8_opcode_FX15_set_delay_timer(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF01E) {
@@ -363,6 +392,12 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
     } else {
         printf("Unknown Opcode: %02X\n", opcode);
         exit(0);
+    }
+
+    // Update timers
+    state->delayTimer--;
+    if(state->delayTimer < 0) {
+        state->delayTimer = 60;
     }
 }
 
