@@ -33,11 +33,13 @@ short C8_get_next_opcode(C8_CPU_State *state) {
 }
 
 void C8_push_stack(C8_CPU_State *state) {
+    printf("Pushing %d at stack index %d\n", state->programCounter, state->stackIndex);
     state->stack[state->stackIndex++] = state->programCounter;
 }
 
 short C8_pop_stack(C8_CPU_State *state) {
-    return state->stack[state->stackIndex--];
+    printf("Popping %d from stack index %d\n", state->stack[state->stackIndex - 1], state->stackIndex);
+    return state->stack[--state->stackIndex];
 }
 
 void C8_opcode_00E0_clear_screen(C8_CPU_State *state) {
@@ -46,6 +48,7 @@ void C8_opcode_00E0_clear_screen(C8_CPU_State *state) {
 
 void C8_opcode_00EE_subroutine_return(C8_CPU_State *state) {
     state->programCounter = C8_pop_stack(state);
+    printf("PC %d\n", state->programCounter);
 }
 
 void C8_opcode_1XXX_set_pc(C8_CPU_State *state, short opcode) {
