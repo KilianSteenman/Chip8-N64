@@ -5,6 +5,7 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 320
 #define GRID_SIZE 1 // Size of each grid cell
+#define GRID_SCALE 10
 
 // Function to get the size of a file
 long getFileSize(FILE *file) {
@@ -26,8 +27,8 @@ void renderGrid(C8_CPU_State *state, SDL_Renderer *renderer) {
     for (int x = 0; x < SCREEN_WIDTH; x += GRID_SIZE) {
         for (int y = 0; y < SCREEN_HEIGHT; y += GRID_SIZE) {
 
-            int xOffset = x / 10;
-            int yOffset = y / 10;
+            int xOffset = x / GRID_SCALE;
+            int yOffset = y / GRID_SCALE;
 
             if (state->display[yOffset][xOffset]) {
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set color to black
@@ -66,14 +67,14 @@ int main() {
 
     // Open the file in binary read mode
 //    file = fopen("1-chip8-logo.ch8", "rb");
-    file = fopen("2-ibm-logo.ch8", "rb");
+//    file = fopen("2-ibm-logo.ch8", "rb");
 //        file = fopen("3-corax+.ch8", "rb");
 //    file = fopen("4-flags.ch8", "rb");
 //    file = fopen("ibm_logo.c8", "rb");
 //    file = fopen("c8_test.c8", "rb");
 //    file = fopen("test_opcode.ch8", "rb");
 //    file = fopen("BC_test.ch8", "rb");
-//    file = fopen("Tetris.ch8", "rb");
+    file = fopen("Tetris.ch8", "rb");
 //    file = fopen("Pong.ch8", "rb");
     if (file == NULL) {
         perror("Error opening file");
@@ -118,9 +119,12 @@ int main() {
     while (!quit) {
         C8_execute_program(&cpu_state);
 
-        renderGrid(&cpu_state, renderer); // Render grid
+        if(cpu_state.draw == 1) {
+            renderGrid(&cpu_state, renderer); // Render grid
+            SDL_RenderPresent(renderer); // Update screen
 
-        SDL_RenderPresent(renderer); // Update screen
+            cpu_state.draw = 0;
+        }
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {

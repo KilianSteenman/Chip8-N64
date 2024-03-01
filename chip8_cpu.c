@@ -28,10 +28,12 @@ void C8_init(C8_CPU_State *state) {
     memset(state->keys, 0, sizeof(state->keys));
 
     state->delayTimer = 60;
+    state->draw = 0;
 }
 
 void C8_clear_screen(C8_CPU_State *state) {
     memset(state->display, 0, sizeof(state->display));
+    state->draw = 1;
 }
 
 short C8_get_next_opcode(C8_CPU_State *state) {
@@ -254,6 +256,7 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
             }
         }
     }
+    state->draw = 1;
 }
 
 void C8_opcode_EX9E_is_key_pressed(C8_CPU_State *state, short opcode) {
