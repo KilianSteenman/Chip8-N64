@@ -7,6 +7,8 @@
 #define GRID_SIZE 1 // Size of each grid cell
 #define GRID_SCALE 10
 
+uint8_t display[SCREEN_WIDTH * SCREEN_HEIGHT * 4];
+
 // Function to get the size of a file
 long getFileSize(FILE *file) {
     long size;
@@ -30,13 +32,18 @@ void renderGrid(C8_CPU_State *state, SDL_Renderer *renderer) {
             int xOffset = x / GRID_SCALE;
             int yOffset = y / GRID_SCALE;
 
+            int pixelIndex = (y * SCREEN_WIDTH + x) * 4;
             if (state->display[yOffset][xOffset]) {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set color to black
+                display[pixelIndex] = 0;
+                display[pixelIndex + 1] = 0;
+                display[pixelIndex + 2] = 0;
+                display[pixelIndex + 3] = 255;
             } else {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set color to white
+                display[pixelIndex] = 255;
+                display[pixelIndex + 1] = 255;
+                display[pixelIndex + 2] = 255;
+                display[pixelIndex + 3] = 255;
             }
-            SDL_Rect rect = {x, y, GRID_SIZE, GRID_SIZE};
-            SDL_RenderFillRect(renderer, &rect); // Draw grid cell
         }
     }
 }
@@ -114,13 +121,19 @@ int main() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Set background color to black
     SDL_RenderClear(renderer);
 
+    SDL_Texture *texTarget = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     SDL_Event event;
     int quit = 0;
     while (!quit) {
         C8_execute_program(&cpu_state);
 
-        if(cpu_state.draw == 1) {
+        if (cpu_state.draw == 1) {
             renderGrid(&cpu_state, renderer); // Render grid
+            SDL_UpdateTexture(texTarget, NULL, display, SCREEN_WIDTH * 4);// * sizeof(Uint8));
+
+            SDL_RenderClear(renderer);
+            SDL_RenderCopyEx(renderer, texTarget, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
             SDL_RenderPresent(renderer); // Update screen
 
             cpu_state.draw = 0;
