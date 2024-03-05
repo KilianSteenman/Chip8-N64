@@ -130,7 +130,7 @@ int main() {
 
         if (cpu_state.draw == 1) {
             renderGrid(&cpu_state, renderer); // Render grid
-            SDL_UpdateTexture(texTarget, NULL, display, SCREEN_WIDTH * 4);// * sizeof(Uint8));
+            SDL_UpdateTexture(texTarget, NULL, display, SCREEN_WIDTH * 4);
 
             SDL_RenderClear(renderer);
             SDL_RenderCopyEx(renderer, texTarget, NULL, NULL, 0, NULL, SDL_FLIP_NONE);

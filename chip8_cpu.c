@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 const int PROGRAM_OFFSET = 0x200;
 const int FONT_OFFSET = 0x050;
@@ -29,6 +30,8 @@ void C8_init(C8_CPU_State *state) {
 
     state->delayTimer = 60;
     state->draw = 0;
+
+    srand(time(NULL));
 }
 
 void C8_clear_screen(C8_CPU_State *state) {
