@@ -29,6 +29,7 @@ void C8_init(C8_CPU_State *state) {
     memset(state->keys, 0, sizeof(state->keys));
 
     state->delayTimer = 60;
+    state->soundTimer = 60;
     state->draw = 0;
 
     srand(time(NULL));
@@ -286,6 +287,11 @@ void C8_opcode_FX15_set_delay_timer(C8_CPU_State *state, short opcode) {
     state->delayTimer = state->registers[reg];
 }
 
+void C8_opcode_FX18_set_sound_timer(C8_CPU_State *state, short opcode) {
+    char reg = (opcode & 0x0F00) >> 8;
+    state->soundTimer = state->registers[reg];
+}
+
 void C8_opcode_FX1E_add_to_index(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
     state->index += state->registers[reg];
@@ -385,6 +391,8 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
         C8_opcode_FX07_store_delay_timer(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF015) {
         C8_opcode_FX15_set_delay_timer(state, opcode);
+    } else if((opcode & 0xF0FF) == 0xF018) {
+        C8_opcode_FX18_set_sound_timer(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF01E) {
         C8_opcode_FX1E_add_to_index(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF029) {

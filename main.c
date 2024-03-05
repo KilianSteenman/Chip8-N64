@@ -81,8 +81,8 @@ int main() {
 //    file = fopen("c8_test.c8", "rb");
 //    file = fopen("test_opcode.ch8", "rb");
 //    file = fopen("BC_test.ch8", "rb");
-    file = fopen("Tetris.ch8", "rb");
-//    file = fopen("Pong.ch8", "rb");
+//    file = fopen("Tetris.ch8", "rb");
+    file = fopen("Pong.ch8", "rb");
     if (file == NULL) {
         perror("Error opening file");
         return 1;
