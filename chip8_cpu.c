@@ -12,6 +12,43 @@
 const int PROGRAM_OFFSET = 0x200;
 const int FONT_OFFSET = 0x050;
 
+FILE *logFile;
+
+void C8_print_state(C8_CPU_State *state) {
+    int16_t programCounter;
+
+    int16_t index;
+
+    int16_t stack[16];
+    int8_t stackIndex;
+
+    uint8_t delayTimer;
+    uint8_t soundTimer;
+    uint8_t registers[16];
+    fprintf(logFile, "%d, %d Timer[%d, %d], Reg[%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d]\n",
+           state->programCounter,
+           state->index,
+           state->delayTimer,
+           state->soundTimer,
+           state->registers[0],
+           state->registers[1],
+           state->registers[2],
+           state->registers[3],
+           state->registers[4],
+           state->registers[5],
+           state->registers[6],
+           state->registers[7],
+           state->registers[8],
+           state->registers[9],
+           state->registers[10],
+           state->registers[11],
+           state->registers[12],
+           state->registers[13],
+           state->registers[14],
+           state->registers[15]
+    );
+}
+
 void C8_load_font(C8_CPU_State *state, char *font, char size) {
     memcpy(&state->memory[FONT_OFFSET], font, size);
 }
@@ -22,6 +59,9 @@ void C8_load_program(C8_CPU_State *state, char *program, int programSize) {
 }
 
 void C8_init(C8_CPU_State *state) {
+    logFile = fopen("test.log", "w"); // a (create) option will allow appending which is useful in a log file
+    if (logFile == NULL) { exit(0); }
+
     memset(state->registers, 0, sizeof(state->registers));
     memset(state->memory, 0, sizeof(state->memory));
     memset(state->stack, 0, sizeof(state->stack));
@@ -265,14 +305,14 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
 
 void C8_opcode_EX9E_is_key_pressed(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
-    if(state->keys[reg] == 1) {
+    if (state->keys[reg] == 1) {
         state->programCounter += 2;
     }
 }
 
 void C8_opcode_EXA1_is_key_not_pressed(C8_CPU_State *state, short opcode) {
     char reg = (opcode & 0x0F00) >> 8;
-    if(state->keys[reg] == 0) {
+    if (state->keys[reg] == 0) {
         state->programCounter += 2;
     }
 }
@@ -320,7 +360,7 @@ void C8_opcode_FX33_bin_dec(C8_CPU_State *state, short opcode) {
 void C8_opcode_FX55_store_mem(C8_CPU_State *state, short opcode) {
     char count = (opcode & 0x0F00) >> 8;
     printf("Storing %d\n", count);
-    for(int i = 0; i <= count; i++) {
+    for (int i = 0; i <= count; i++) {
         printf("Store[%d] %d into %d\n", i, state->registers[i], (state->index + 1));
         state->memory[state->index + i] = state->registers[i];
     }
@@ -329,7 +369,7 @@ void C8_opcode_FX55_store_mem(C8_CPU_State *state, short opcode) {
 void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
     char count = (opcode & 0x0F00) >> 8;
     printf("Reading %d\n", count);
-    for(int i = 0; i <= count; i++) {
+    for (int i = 0; i <= count; i++) {
         printf("Read[%d] %d\n", i, state->memory[state->index + i]);
         state->registers[i] = state->memory[state->index + i];
     }
@@ -391,7 +431,7 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
         C8_opcode_FX07_store_delay_timer(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF015) {
         C8_opcode_FX15_set_delay_timer(state, opcode);
-    } else if((opcode & 0xF0FF) == 0xF018) {
+    } else if ((opcode & 0xF0FF) == 0xF018) {
         C8_opcode_FX18_set_sound_timer(state, opcode);
     } else if ((opcode & 0xF0FF) == 0xF01E) {
         C8_opcode_FX1E_add_to_index(state, opcode);
@@ -407,15 +447,19 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
         printf("Unknown Opcode: %02X\n", opcode);
         exit(0);
     }
-
-    // Update timers
-    state->delayTimer--;
-    if(state->delayTimer < 0) {
-        state->delayTimer = 60;
-    }
 }
 
 void C8_execute_program(C8_CPU_State *state) {
     short opcode = C8_get_next_opcode(state);
     C8_execute_opcode(state, opcode);
+
+    // Update timers
+    if(state->delayTimer > 0) {
+        state->delayTimer--;
+    }
+    if(state->soundTimer > 0) {
+        state->soundTimer--;
+    }
+
+    C8_print_state(state);
 }
