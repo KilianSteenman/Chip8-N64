@@ -49,6 +49,15 @@ void C8_print_state(C8_CPU_State *state) {
     );
 }
 
+void C8_print_display_state(C8_CPU_State *state) {
+    for(int i = 0; i < 32; i++) {
+        for(int j = 0; j < 64; j++) {
+            fprintf(logFile, "%d", state->display[i][j]);
+        }
+    }
+    fprintf(logFile, "\n");
+}
+
 void C8_load_font(C8_CPU_State *state, char *font, char size) {
     memcpy(&state->memory[FONT_OFFSET], font, size);
 }
@@ -69,8 +78,9 @@ void C8_init(C8_CPU_State *state) {
     memset(state->keys, 0, sizeof(state->keys));
 
     state->delayTimer = 60;
-    state->soundTimer = 60;
+    state->soundTimer = 0;
     state->draw = 0;
+    state->index = 0;
 
     srand(time(NULL));
 }
@@ -283,8 +293,8 @@ void C8_opcode_CXXX_random(C8_CPU_State *state, short opcode) {
 
 void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
     char sprite_height = opcode & 0x000F;
-    uint8_t x = state->registers[(opcode & 0x0100) >> 8] % 64;
-    uint8_t y = state->registers[(opcode & 0x0010) >> 4] % 32;
+    uint8_t x = state->registers[(opcode & 0x0F00) >> 8] % 64;
+    uint8_t y = state->registers[(opcode & 0x00F0) >> 4] % 32;
     char pixel;
 
     state->registers[0xF] = 0;
@@ -297,6 +307,7 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
                     state->registers[0xF] = 1;
                 }
                 state->display[y + y_coordinate][x + x_coordinate] ^= 1;
+                fprintf(logFile, "[%d] %d at (%d,%d)\n", (((y + y_coordinate) * 64) + (x + x_coordinate)), state->display[y + y_coordinate][x + x_coordinate], x, y);
             }
         }
     }
@@ -461,5 +472,5 @@ void C8_execute_program(C8_CPU_State *state) {
         state->soundTimer--;
     }
 
-    C8_print_state(state);
+//    C8_print_state(state);
 }
