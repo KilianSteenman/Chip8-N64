@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Build SDL" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="rm chip-8; gcc main.c chip8_cpu.c -o ../build/chip-8 -lSDL2; ../build/chip-8" />
+    <option name="SCRIPT_TEXT" value="rm chip-8; gcc main.c file_utils.c chip8_cpu.c -o ../build/chip-8 -lSDL2; ../build/chip-8" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

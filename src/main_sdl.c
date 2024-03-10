@@ -39,7 +39,7 @@ int main() {
     long fileLength;
 
     // Open the file in binary read mode
-//    file = fopen("1-chip8-logo.ch8", "rb");
+//    file = fopen("test_rom.ch8", "rb");
 //    file = fopen("2-ibm-logo.ch8", "rb");
 //        file = fopen("3-corax+.ch8", "rb");
     file = fopen("4-flags.ch8", "rb");
