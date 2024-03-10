@@ -1,0 +1,28 @@
+# Random
+.DS_Store
+
+# LibDragon
+libdragon/
+libdragon
+.libdragon/
+
+# Build
+build/
+*.z64
+
+# Intellij
+.idea/*
+
+# Source assets
+assets/
+
+# N64 Save formats
+*.srm
+*.eep
+
+# Logs
+*.log
+
+# Chip 8 roms
+*.c8
+*.ch8

@@ -26,32 +26,32 @@ void C8_print_state(C8_CPU_State *state) {
     uint8_t soundTimer;
     uint8_t registers[16];
     fprintf(logFile, "%d, %d Timer[%d, %d], Reg[%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d]\n",
-           state->programCounter,
-           state->index,
-           state->delayTimer,
-           state->soundTimer,
-           state->registers[0],
-           state->registers[1],
-           state->registers[2],
-           state->registers[3],
-           state->registers[4],
-           state->registers[5],
-           state->registers[6],
-           state->registers[7],
-           state->registers[8],
-           state->registers[9],
-           state->registers[10],
-           state->registers[11],
-           state->registers[12],
-           state->registers[13],
-           state->registers[14],
-           state->registers[15]
+            state->programCounter,
+            state->index,
+            state->delayTimer,
+            state->soundTimer,
+            state->registers[0],
+            state->registers[1],
+            state->registers[2],
+            state->registers[3],
+            state->registers[4],
+            state->registers[5],
+            state->registers[6],
+            state->registers[7],
+            state->registers[8],
+            state->registers[9],
+            state->registers[10],
+            state->registers[11],
+            state->registers[12],
+            state->registers[13],
+            state->registers[14],
+            state->registers[15]
     );
 }
 
 void C8_print_display_state(C8_CPU_State *state) {
-    for(int i = 0; i < 32; i++) {
-        for(int j = 0; j < 64; j++) {
+    for (int i = 0; i < 32; i++) {
+        for (int j = 0; j < 64; j++) {
             fprintf(logFile, "%d", state->display[i][j]);
         }
     }
@@ -307,7 +307,8 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
                     state->registers[0xF] = 1;
                 }
                 state->display[y + y_coordinate][x + x_coordinate] ^= 1;
-                fprintf(logFile, "[%d] %d at (%d,%d)\n", (((y + y_coordinate) * 64) + (x + x_coordinate)), state->display[y + y_coordinate][x + x_coordinate], x, y);
+                fprintf(logFile, "[%d] %d at (%d,%d)\n", (((y + y_coordinate) * 64) + (x + x_coordinate)),
+                        state->display[y + y_coordinate][x + x_coordinate], x, y);
             }
         }
     }
@@ -465,10 +466,10 @@ void C8_execute_program(C8_CPU_State *state) {
     C8_execute_opcode(state, opcode);
 
     // Update timers
-    if(state->delayTimer > 0) {
+    if (state->delayTimer > 0) {
         state->delayTimer--;
     }
-    if(state->soundTimer > 0) {
+    if (state->soundTimer > 0) {
         state->soundTimer--;
     }
 
