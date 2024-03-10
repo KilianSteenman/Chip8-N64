@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 
+#include "file_utils.h"
 #include "chip8_cpu.h"
 
 #define SCREEN_WIDTH 640
@@ -8,22 +9,6 @@
 #define GRID_SCALE 10
 
 uint8_t display[SCREEN_WIDTH * SCREEN_HEIGHT * 4];
-
-// Function to get the size of a file
-long getFileSize(FILE *file) {
-    long size;
-
-    // Move the file cursor to the end of the file
-    fseek(file, 0, SEEK_END);
-
-    // Get the current position of the cursor (which is the size of the file)
-    size = ftell(file);
-
-    // Move the cursor back to the beginning of the file
-    fseek(file, 0, SEEK_SET);
-
-    return size;
-}
 
 void renderGrid(C8_CPU_State *state, SDL_Renderer *renderer) {
     for (int x = 0; x < SCREEN_WIDTH; x += GRID_SIZE) {
