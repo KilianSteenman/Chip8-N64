@@ -113,7 +113,12 @@ void C8_clear_screen(C8_CPU_State *state) {
 }
 
 short C8_get_next_opcode(C8_CPU_State *state) {
-    return (state->memory[state->programCounter++] << 8) | (state->memory[state->programCounter++] << 0);
+    short opcode = 0;
+    opcode = state->memory[state->programCounter] << 8;
+    state->programCounter += 1;
+    opcode |= state->memory[state->programCounter] << 0;
+    state->programCounter += 1;
+    return opcode;
 }
 
 void C8_push_stack(C8_CPU_State *state) {
@@ -145,7 +150,7 @@ void C8_opcode_2XXX_subroutine(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_3XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
 
     printf("Checking register %d %d == %d\n", reg, state->registers[reg], value);
@@ -155,7 +160,7 @@ void C8_opcode_3XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_4XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
 
     if (state->registers[reg] != value) {
@@ -164,8 +169,8 @@ void C8_opcode_4XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_5XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     if (state->registers[regX] == state->registers[regY]) {
         state->programCounter += 2;
@@ -173,27 +178,27 @@ void C8_opcode_5XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_6XXX_set_register(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
     state->registers[reg] = value;
 }
 
 void C8_opcode_7XXX_add_value_to_register(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
     state->registers[reg] += value;
 }
 
 void C8_opcode_8XX0_set(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     state->registers[regX] = state->registers[regY];
 }
 
 void C8_opcode_8XX1_or(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     uint8_t valueX = state->registers[regX];
     uint8_t valueY = state->registers[regY];
@@ -202,8 +207,8 @@ void C8_opcode_8XX1_or(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_8XX2_and(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     uint8_t valueX = state->registers[regX];
     uint8_t valueY = state->registers[regY];
@@ -212,8 +217,8 @@ void C8_opcode_8XX2_and(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_8XX3_xor(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     uint8_t valueX = state->registers[regX];
     uint8_t valueY = state->registers[regY];
@@ -222,8 +227,8 @@ void C8_opcode_8XX3_xor(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_8XX4_add(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     uint8_t valueX = state->registers[regX];
     uint8_t valueY = state->registers[regY];
@@ -233,8 +238,8 @@ void C8_opcode_8XX4_add(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_8XX5_subtract(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     uint8_t valueX = state->registers[regX];
     uint8_t valueY = state->registers[regY];
@@ -249,19 +254,19 @@ void C8_opcode_8XX5_subtract(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_8XX6_shift_right(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+//    uint8_t regY = (opcode & 0x00F0) >> 4; TODO: Is this actually unused?
 
     uint8_t valueX = state->registers[regX];
-    uint8_t valueY = state->registers[regY];
+//    uint8_t valueY = state->registers[regY]; TODO: Is this actually unused?
 
     state->registers[0xF] = (valueX & 0x01) == 0x01;
     state->registers[regX] = valueX >> 1;
 }
 
 void C8_opcode_8XX7_subtract(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     uint8_t valueX = state->registers[regX];
     uint8_t valueY = state->registers[regY];
@@ -276,19 +281,19 @@ void C8_opcode_8XX7_subtract(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_8XXE_shift_left(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+//    uint8_t regY = (opcode & 0x00F0) >> 4; TODO: Is this actually unused?
 
     uint8_t valueX = state->registers[regX];
-    uint8_t valueY = state->registers[regY];
+//  uint8_t valueY = state->registers[regY]; TODO: Is this actually unused?
 
     state->registers[0xF] = (valueX & 0x80) == 0x80;
     state->registers[regX] = valueX << 1;
 }
 
 void C8_opcode_9XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
-    char regX = (opcode & 0x0F00) >> 8;
-    char regY = (opcode & 0x00F0) >> 4;
+    uint8_t regX = (opcode & 0x0F00) >> 8;
+    uint8_t regY = (opcode & 0x00F0) >> 4;
 
     if (state->registers[regX] != state->registers[regY]) {
         state->programCounter += 2;
@@ -314,10 +319,10 @@ void C8_opcode_CXXX_random(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
-    char sprite_height = opcode & 0x000F;
+    uint8_t sprite_height = opcode & 0x000F;
     uint8_t x = state->registers[(opcode & 0x0F00) >> 8] % 64;
     uint8_t y = state->registers[(opcode & 0x00F0) >> 4] % 32;
-    char pixel;
+    uint8_t pixel;
 
     state->registers[0xF] = 0;
 
@@ -338,46 +343,46 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_EX9E_is_key_pressed(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     if (state->keys[reg] == 1) {
         state->programCounter += 2;
     }
 }
 
 void C8_opcode_EXA1_is_key_not_pressed(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     if (state->keys[reg] == 0) {
         state->programCounter += 2;
     }
 }
 
 void C8_opcode_FX07_store_delay_timer(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     state->registers[reg] = state->delayTimer;
 }
 
 void C8_opcode_FX15_set_delay_timer(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     state->delayTimer = state->registers[reg];
 }
 
 void C8_opcode_FX18_set_sound_timer(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     state->soundTimer = state->registers[reg];
 }
 
 void C8_opcode_FX1E_add_to_index(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     state->index += state->registers[reg];
 }
 
 void C8_opcode_FXXX_load_font_char(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     state->index = (FONT_OFFSET + (state->registers[reg] * 5));
 }
 
 void C8_opcode_FX33_bin_dec(C8_CPU_State *state, short opcode) {
-    char reg = (opcode & 0x0F00) >> 8;
+    uint8_t reg = (opcode & 0x0F00) >> 8;
     uint8_t value = state->registers[reg];
 
     uint8_t p1 = (value / 100);
@@ -392,7 +397,7 @@ void C8_opcode_FX33_bin_dec(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_FX55_store_mem(C8_CPU_State *state, short opcode) {
-    char count = (opcode & 0x0F00) >> 8;
+    uint8_t count = (opcode & 0x0F00) >> 8;
     printf("Storing %d\n", count);
     for (int i = 0; i <= count; i++) {
         printf("Store[%d] %d into %d\n", i, state->registers[i], (state->index + 1));
@@ -401,7 +406,7 @@ void C8_opcode_FX55_store_mem(C8_CPU_State *state, short opcode) {
 }
 
 void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
-    char count = (opcode & 0x0F00) >> 8;
+    uint8_t count = (opcode & 0x0F00) >> 8;
     printf("Reading %d\n", count);
     for (int i = 0; i <= count; i++) {
         printf("Read[%d] %d\n", i, state->memory[state->index + i]);
