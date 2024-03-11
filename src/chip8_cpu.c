@@ -143,7 +143,6 @@ void C8_opcode_3XXX_skip_conditionally(C8_CPU_State *state, short opcode) {
     uint8_t reg = (opcode & 0x0F00) >> 8;
     uint8_t value = opcode & 0x00FF;
 
-    printf("Checking register %d %d == %d\n", reg, state->registers[reg], value);
     if (state->registers[reg] == value) {
         state->programCounter += 2;
     }
@@ -379,8 +378,6 @@ void C8_opcode_FX33_bin_dec(C8_CPU_State *state, short opcode) {
     uint8_t p2 = (value / 10 % 10);
     uint8_t p3 = (value % 100 % 10);
 
-    printf("Value %d, %d %d %d\n", value, p1, p2, p3);
-
     state->memory[state->index] = p1;
     state->memory[state->index + 1] = p2;
     state->memory[state->index + 2] = p3;
@@ -388,24 +385,20 @@ void C8_opcode_FX33_bin_dec(C8_CPU_State *state, short opcode) {
 
 void C8_opcode_FX55_store_mem(C8_CPU_State *state, short opcode) {
     uint8_t count = (opcode & 0x0F00) >> 8;
-    printf("Storing %d\n", count);
     for (int i = 0; i <= count; i++) {
-        printf("Store[%d] %d into %d\n", i, state->registers[i], (state->index + 1));
         state->memory[state->index + i] = state->registers[i];
     }
 }
 
 void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
     uint8_t count = (opcode & 0x0F00) >> 8;
-    printf("Reading %d\n", count);
     for (int i = 0; i <= count; i++) {
-        printf("Read[%d] %d\n", i, state->memory[state->index + i]);
         state->registers[i] = state->memory[state->index + i];
     }
 }
 
 void C8_execute_opcode(C8_CPU_State *state, short opcode) {
-    printf("Opcode: %02X\n", opcode);
+//    printf("Opcode: %02X\n", opcode);
     if (opcode == 0x00E0) {
         C8_opcode_00E0_clear_screen(state);
     } else if (opcode == 0x00EE) {
