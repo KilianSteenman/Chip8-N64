@@ -125,7 +125,7 @@ void C8_opcode_00E0_clear_screen(C8_CPU_State *state) {
 
 void C8_opcode_00EE_subroutine_return(C8_CPU_State *state) {
     state->programCounter = C8_pop_stack(state);
-    printf("PC %d\n", state->programCounter);
+//    printf("PC %d\n", state->programCounter);
 }
 
 void C8_opcode_1XXX_set_pc(C8_CPU_State *state, short opcode) {
@@ -397,7 +397,7 @@ void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
     }
 }
 
-void C8_execute_opcode(C8_CPU_State *state, short opcode) {
+void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
 //    printf("Opcode: %02X\n", opcode);
     if (opcode == 0x00E0) {
         C8_opcode_00E0_clear_screen(state);
@@ -472,7 +472,7 @@ void C8_execute_opcode(C8_CPU_State *state, short opcode) {
 }
 
 void C8_execute_program(C8_CPU_State *state) {
-    short opcode = C8_get_next_opcode(state);
+    int16_t opcode = C8_get_next_opcode(state);
     C8_execute_opcode(state, opcode);
 
     // Update timers

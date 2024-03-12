@@ -9,7 +9,7 @@
 
 typedef struct {
     uint8_t keys[16];
-    char draw;
+    uint8_t draw;
 
     int16_t programCounter;
 
