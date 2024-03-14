@@ -31,8 +31,11 @@ void draw_display(C8_CPU_State *state, display_context_t disp) {
 }
 
 int main(void) {
-    display_init(RESOLUTION_640x480, DEPTH_32_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
+    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
     console_init();
+
+    struct controller_data controllers;
+    controller_init();
 
     debug_init_usblog();
 //    console_set_debug(true);
@@ -53,8 +56,9 @@ int main(void) {
 //    rom = fopen("rom://2-ibm-logo.ch8", "r");
 //    rom = fopen("rom://3-corax+.ch8", "r");
 //    rom = fopen("rom://4-flags.ch8", "r");
+    rom = fopen("rom://6-keypad.ch8", "r");
 //    rom = fopen("rom://BC_test.ch8", "r");
-    rom = fopen("rom://Tetris.ch8", "r");
+//    rom = fopen("rom://Tetris.ch8", "r");
     if (rom == NULL) {
         printf("Unable to open game rom\n");
         return 1;
@@ -88,14 +92,23 @@ int main(void) {
 
     display_context_t disp;
     while (1) {
-        while(!(disp = display_lock()));
-
         C8_execute_program(&cpu_state);
 
         if (cpu_state.draw == 1) {
+            while (!(disp = display_get()));
             draw_display(&cpu_state, disp);
+            display_show(disp);
             cpu_state.draw = 0;
         }
-        display_show(disp);
+
+        // Controller check
+        controller_scan();
+        controllers = get_keys_pressed();
+        cpu_state.keys[0x4] = controllers.c[0].C_up;
+        cpu_state.keys[0x1] = controllers.c[0].C_down;
+        cpu_state.keys[0xE] = controllers.c[0].up;
+        cpu_state.keys[0xF] = controllers.c[0].down;
+        cpu_state.keys[0xA] = controllers.c[0].A;
+//        printf("KEYS %d %d %d\n", cpu_state.keys[0xE], cpu_state.keys[0xF], cpu_state.keys[0xA]);
     }
 }

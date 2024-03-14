@@ -333,6 +333,7 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
 
 void C8_opcode_EX9E_is_key_pressed(C8_CPU_State *state, short opcode) {
     uint8_t reg = (opcode & 0x0F00) >> 8;
+//    printf("keys %d %d\n", reg, state->keys[reg]);
     if (state->keys[reg] == 1) {
         state->programCounter += 2;
     }
