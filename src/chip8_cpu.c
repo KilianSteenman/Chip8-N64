@@ -401,10 +401,13 @@ void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
 void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
     switch (opcode & 0xF000) {
         case 0x0000:
-            if (opcode == 0x00E0) {
-                C8_opcode_00E0_clear_screen(state);
-            } else if (opcode == 0x00EE) {
-                C8_opcode_00EE_subroutine_return(state);
+            switch (opcode & 0x00FF) {
+                case 0x00E0:
+                    C8_opcode_00E0_clear_screen(state);
+                    break;
+                case 0x00EE:
+                    C8_opcode_00EE_subroutine_return(state);
+                    break;
             }
             break;
         case 0x1000:
@@ -429,24 +432,34 @@ void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
             C8_opcode_7XXX_add_value_to_register(state, opcode);
             break;
         case 0x8000:
-            if ((opcode & 0xF00F) == 0x8000) {
-                C8_opcode_8XX0_set(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8001) {
-                C8_opcode_8XX1_or(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8002) {
-                C8_opcode_8XX2_and(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8003) {
-                C8_opcode_8XX3_xor(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8004) {
-                C8_opcode_8XX4_add(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8005) {
-                C8_opcode_8XX5_subtract(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8006) {
-                C8_opcode_8XX6_shift_right(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x8007) {
-                C8_opcode_8XX7_subtract(state, opcode);
-            } else if ((opcode & 0xF00F) == 0x800E) {
-                C8_opcode_8XXE_shift_left(state, opcode);
+            switch (opcode & 0x000F) {
+                case 0:
+                    C8_opcode_8XX0_set(state, opcode);
+                    break;
+                case 0x0001:
+                    C8_opcode_8XX1_or(state, opcode);
+                    break;
+                case 0x0002:
+                    C8_opcode_8XX2_and(state, opcode);
+                    break;
+                case 0x0003:
+                    C8_opcode_8XX3_xor(state, opcode);
+                    break;
+                case 0x0004:
+                    C8_opcode_8XX4_add(state, opcode);
+                    break;
+                case 0x0005:
+                    C8_opcode_8XX5_subtract(state, opcode);
+                    break;
+                case 0x0006:
+                    C8_opcode_8XX6_shift_right(state, opcode);
+                    break;
+                case 0x0007:
+                    C8_opcode_8XX7_subtract(state, opcode);
+                    break;
+                case 0x000E:
+                    C8_opcode_8XXE_shift_left(state, opcode);
+                    break;
             }
             break;
         case 0x9000:
@@ -465,29 +478,41 @@ void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
             C8_opcode_DXXX_display(state, opcode);
             break;
         case 0xE000:
-            if ((opcode & 0xF0FF) == 0xE09E) {
-                C8_opcode_EX9E_is_key_pressed(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xE0A1) {
-                C8_opcode_EXA1_is_key_not_pressed(state, opcode);
+            switch (opcode & 0x00FF) {
+                case 0x009E:
+                    C8_opcode_EX9E_is_key_pressed(state, opcode);
+                    break;
+                case 0x00A1:
+                    C8_opcode_EXA1_is_key_not_pressed(state, opcode);
+                    break;
             }
             break;
         case 0xF000:
-            if ((opcode & 0xF0FF) == 0xF007) {
-                C8_opcode_FX07_store_delay_timer(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF015) {
-                C8_opcode_FX15_set_delay_timer(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF018) {
-                C8_opcode_FX18_set_sound_timer(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF01E) {
-                C8_opcode_FX1E_add_to_index(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF029) {
-                C8_opcode_FXXX_load_font_char(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF033) {
-                C8_opcode_FX33_bin_dec(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF055) {
-                C8_opcode_FX55_store_mem(state, opcode);
-            } else if ((opcode & 0xF0FF) == 0xF065) {
-                C8_opcode_FX65_read_mem(state, opcode);
+            switch (opcode & 0x00FF) {
+                case 0x0007:
+                    C8_opcode_FX07_store_delay_timer(state, opcode);
+                    break;
+                case 0x0015:
+                    C8_opcode_FX15_set_delay_timer(state, opcode);
+                    break;
+                case 0x0018:
+                    C8_opcode_FX18_set_sound_timer(state, opcode);
+                    break;
+                case 0x001E:
+                    C8_opcode_FX1E_add_to_index(state, opcode);
+                    break;
+                case 0x0029:
+                    C8_opcode_FXXX_load_font_char(state, opcode);
+                    break;
+                case 0x0033:
+                    C8_opcode_FX33_bin_dec(state, opcode);
+                    break;
+                case 0x0055:
+                    C8_opcode_FX55_store_mem(state, opcode);
+                    break;
+                case 0x0065:
+                    C8_opcode_FX65_read_mem(state, opcode);
+                    break;
             }
             break;
         default:
