@@ -25,7 +25,7 @@ void draw_display(C8_CPU_State *state, display_context_t disp) {
             } else {
                 color = color_off;
             }
-            graphics_draw_pixel(disp, x, y, color);
+            graphics_draw_pixel(disp, x + 300, y, color);
         }
     }
 }
@@ -104,11 +104,26 @@ int main(void) {
         // Controller check
         controller_scan();
         controllers = get_keys_pressed();
-        cpu_state.keys[0x4] = controllers.c[0].C_up;
-        cpu_state.keys[0x1] = controllers.c[0].C_down;
-        cpu_state.keys[0xE] = controllers.c[0].up;
-        cpu_state.keys[0xF] = controllers.c[0].down;
-        cpu_state.keys[0xA] = controllers.c[0].A;
-//        printf("KEYS %d %d %d\n", cpu_state.keys[0xE], cpu_state.keys[0xF], cpu_state.keys[0xA]);
+        cpu_state.keys[0x0] = controllers.c[0].C_up;
+        cpu_state.keys[0x1] = controllers.c[0].C_left;
+        cpu_state.keys[0x2] = controllers.c[0].C_down;
+        cpu_state.keys[0x3] = controllers.c[0].C_right;
+        cpu_state.keys[0x4] = controllers.c[0].up;
+        cpu_state.keys[0x5] = controllers.c[0].left;
+        cpu_state.keys[0x6] = controllers.c[0].down;
+        cpu_state.keys[0x7] = controllers.c[0].right;
+        cpu_state.keys[0x8] = controllers.c[0].A;
+        cpu_state.keys[0x9] = controllers.c[0].B;
+        cpu_state.keys[0xA] = controllers.c[0].L;
+        cpu_state.keys[0xB] = controllers.c[0].R;
+        cpu_state.keys[0xC] = controllers.c[0].Z;
+//        cpu_state.keys[0xD] = controllers.c[0].Start;
+        cpu_state.keys[0xE] = controllers.c[0].L;
+        cpu_state.keys[0xF] = controllers.c[0].R;
+        printf("KEYS ");
+        for (int i = 0; i <= 0xF; i++) {
+            printf("%d", cpu_state.keys[i]);
+        }
+        printf("\n");
     }
 }
