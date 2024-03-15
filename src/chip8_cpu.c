@@ -399,76 +399,101 @@ void C8_opcode_FX65_read_mem(C8_CPU_State *state, short opcode) {
 }
 
 void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
-//    printf("Opcode: %02X\n", opcode);
-    if (opcode == 0x00E0) {
-        C8_opcode_00E0_clear_screen(state);
-    } else if (opcode == 0x00EE) {
-        C8_opcode_00EE_subroutine_return(state);
-    } else if ((opcode & 0xF000) == 0x1000) {
-        C8_opcode_1XXX_set_pc(state, opcode);
-    } else if ((opcode & 0xF000) == 0x2000) {
-        C8_opcode_2XXX_subroutine(state, opcode);
-    } else if ((opcode & 0xF000) == 0x3000) {
-        C8_opcode_3XXX_skip_conditionally(state, opcode);
-    } else if ((opcode & 0xF000) == 0x4000) {
-        C8_opcode_4XXX_skip_conditionally(state, opcode);
-    } else if ((opcode & 0xF000) == 0x5000) {
-        C8_opcode_5XXX_skip_conditionally(state, opcode);
-    } else if ((opcode & 0xF000) == 0x6000) {
-        C8_opcode_6XXX_set_register(state, opcode);
-    } else if ((opcode & 0xF000) == 0x7000) {
-        C8_opcode_7XXX_add_value_to_register(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8000) {
-        C8_opcode_8XX0_set(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8001) {
-        C8_opcode_8XX1_or(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8002) {
-        C8_opcode_8XX2_and(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8003) {
-        C8_opcode_8XX3_xor(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8004) {
-        C8_opcode_8XX4_add(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8005) {
-        C8_opcode_8XX5_subtract(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8006) {
-        C8_opcode_8XX6_shift_right(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x8007) {
-        C8_opcode_8XX7_subtract(state, opcode);
-    } else if ((opcode & 0xF00F) == 0x800E) {
-        C8_opcode_8XXE_shift_left(state, opcode);
-    } else if ((opcode & 0xF000) == 0x9000) {
-        C8_opcode_9XXX_skip_conditionally(state, opcode);
-    } else if ((opcode & 0xF000) == 0xA000) {
-        C8_opcode_AXXX_set_index(state, opcode);
-    } else if ((opcode & 0xF000) == 0xB000) {
-        C8_opcode_BXXX_jump_with_offset(state, opcode);
-    } else if ((opcode & 0xF000) == 0xC000) {
-        C8_opcode_CXXX_random(state, opcode);
-    } else if ((opcode & 0xF000) == 0xD000) {
-        C8_opcode_DXXX_display(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xE09E) {
-        C8_opcode_EX9E_is_key_pressed(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xE0A1) {
-        C8_opcode_EXA1_is_key_not_pressed(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF007) {
-        C8_opcode_FX07_store_delay_timer(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF015) {
-        C8_opcode_FX15_set_delay_timer(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF018) {
-        C8_opcode_FX18_set_sound_timer(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF01E) {
-        C8_opcode_FX1E_add_to_index(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF029) {
-        C8_opcode_FXXX_load_font_char(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF033) {
-        C8_opcode_FX33_bin_dec(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF055) {
-        C8_opcode_FX55_store_mem(state, opcode);
-    } else if ((opcode & 0xF0FF) == 0xF065) {
-        C8_opcode_FX65_read_mem(state, opcode);
-    } else {
-        printf("Unknown Opcode: %02X\n", opcode);
-        exit(0);
+    switch (opcode & 0xF000) {
+        case 0x0000:
+            if (opcode == 0x00E0) {
+                C8_opcode_00E0_clear_screen(state);
+            } else if (opcode == 0x00EE) {
+                C8_opcode_00EE_subroutine_return(state);
+            }
+            break;
+        case 0x1000:
+            C8_opcode_1XXX_set_pc(state, opcode);
+            break;
+        case 0x2000:
+            C8_opcode_2XXX_subroutine(state, opcode);
+            break;
+        case 0x3000:
+            C8_opcode_3XXX_skip_conditionally(state, opcode);
+            break;
+        case 0x4000:
+            C8_opcode_4XXX_skip_conditionally(state, opcode);
+            break;
+        case 0x5000:
+            C8_opcode_5XXX_skip_conditionally(state, opcode);
+            break;
+        case 0x6000:
+            C8_opcode_6XXX_set_register(state, opcode);
+            break;
+        case 0x7000:
+            C8_opcode_7XXX_add_value_to_register(state, opcode);
+            break;
+        case 0x8000:
+            if ((opcode & 0xF00F) == 0x8000) {
+                C8_opcode_8XX0_set(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8001) {
+                C8_opcode_8XX1_or(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8002) {
+                C8_opcode_8XX2_and(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8003) {
+                C8_opcode_8XX3_xor(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8004) {
+                C8_opcode_8XX4_add(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8005) {
+                C8_opcode_8XX5_subtract(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8006) {
+                C8_opcode_8XX6_shift_right(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x8007) {
+                C8_opcode_8XX7_subtract(state, opcode);
+            } else if ((opcode & 0xF00F) == 0x800E) {
+                C8_opcode_8XXE_shift_left(state, opcode);
+            }
+            break;
+        case 0x9000:
+            C8_opcode_9XXX_skip_conditionally(state, opcode);
+            break;
+        case 0xA000:
+            C8_opcode_AXXX_set_index(state, opcode);
+            break;
+        case 0xB000:
+            C8_opcode_BXXX_jump_with_offset(state, opcode);
+            break;
+        case 0xC000:
+            C8_opcode_CXXX_random(state, opcode);
+            break;
+        case 0xD000:
+            C8_opcode_DXXX_display(state, opcode);
+            break;
+        case 0xE000:
+            if ((opcode & 0xF0FF) == 0xE09E) {
+                C8_opcode_EX9E_is_key_pressed(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xE0A1) {
+                C8_opcode_EXA1_is_key_not_pressed(state, opcode);
+            }
+            break;
+        case 0xF000:
+            if ((opcode & 0xF0FF) == 0xF007) {
+                C8_opcode_FX07_store_delay_timer(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF015) {
+                C8_opcode_FX15_set_delay_timer(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF018) {
+                C8_opcode_FX18_set_sound_timer(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF01E) {
+                C8_opcode_FX1E_add_to_index(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF029) {
+                C8_opcode_FXXX_load_font_char(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF033) {
+                C8_opcode_FX33_bin_dec(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF055) {
+                C8_opcode_FX55_store_mem(state, opcode);
+            } else if ((opcode & 0xF0FF) == 0xF065) {
+                C8_opcode_FX65_read_mem(state, opcode);
+            }
+            break;
+        default:
+            printf("Unknown Opcode: %02X\n", opcode);
+            exit(0);
+            break;
     }
 }
 

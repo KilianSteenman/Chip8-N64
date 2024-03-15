@@ -54,9 +54,9 @@ int main(void) {
 
 //        rom = fopen("rom://1-chip8-logo.ch8", "r");
 //    rom = fopen("rom://2-ibm-logo.ch8", "r");
-//    rom = fopen("rom://3-corax+.ch8", "r");
+    rom = fopen("rom://3-corax+.ch8", "r");
 //    rom = fopen("rom://4-flags.ch8", "r");
-    rom = fopen("rom://6-keypad.ch8", "r");
+//    rom = fopen("rom://6-keypad.ch8", "r");
 //    rom = fopen("rom://BC_test.ch8", "r");
 //    rom = fopen("rom://Tetris.ch8", "r");
     if (rom == NULL) {
