@@ -54,11 +54,12 @@ int main(void) {
 
 //        rom = fopen("rom://1-chip8-logo.ch8", "r");
 //    rom = fopen("rom://2-ibm-logo.ch8", "r");
-    rom = fopen("rom://3-corax+.ch8", "r");
+//    rom = fopen("rom://3-corax+.ch8", "r");
 //    rom = fopen("rom://4-flags.ch8", "r");
-//    rom = fopen("rom://6-keypad.ch8", "r");
+    rom = fopen("rom://6-keypad.ch8", "r");
 //    rom = fopen("rom://BC_test.ch8", "r");
 //    rom = fopen("rom://Tetris.ch8", "r");
+//    rom = fopen("rom://Pong.ch8", "r");
     if (rom == NULL) {
         printf("Unable to open game rom\n");
         return 1;
@@ -108,7 +109,7 @@ int main(void) {
         cpu_state.keys[0x1] = controllers.c[0].C_left;
         cpu_state.keys[0x2] = controllers.c[0].C_down;
         cpu_state.keys[0x3] = controllers.c[0].C_right;
-        cpu_state.keys[0x4] = controllers.c[0].up;
+        cpu_state.keys[0x4] = controllers.c[0].L;
         cpu_state.keys[0x5] = controllers.c[0].left;
         cpu_state.keys[0x6] = controllers.c[0].down;
         cpu_state.keys[0x7] = controllers.c[0].right;
@@ -120,10 +121,10 @@ int main(void) {
 //        cpu_state.keys[0xD] = controllers.c[0].Start;
         cpu_state.keys[0xE] = controllers.c[0].L;
         cpu_state.keys[0xF] = controllers.c[0].R;
-        printf("KEYS ");
-        for (int i = 0; i <= 0xF; i++) {
-            printf("%d", cpu_state.keys[i]);
-        }
-        printf("\n");
+//        printf("KEYS ");
+//        for (int i = 0; i <= 0xF; i++) {
+//            printf("%d", cpu_state.keys[i]);
+//        }
+//        printf("\n");
     }
 }

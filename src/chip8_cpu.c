@@ -333,15 +333,14 @@ void C8_opcode_DXXX_display(C8_CPU_State *state, short opcode) {
 
 void C8_opcode_EX9E_is_key_pressed(C8_CPU_State *state, short opcode) {
     uint8_t reg = (opcode & 0x0F00) >> 8;
-//    printf("keys %d %d\n", reg, state->keys[reg]);
-    if (state->keys[reg] == 1) {
+    if (state->keys[state->registers[reg]] == 1) {
         state->programCounter += 2;
     }
 }
 
 void C8_opcode_EXA1_is_key_not_pressed(C8_CPU_State *state, short opcode) {
     uint8_t reg = (opcode & 0x0F00) >> 8;
-    if (state->keys[reg] == 0) {
+    if (state->keys[state->registers[reg]] == 0) {
         state->programCounter += 2;
     }
 }
@@ -408,6 +407,10 @@ void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
                 case 0x00EE:
                     C8_opcode_00EE_subroutine_return(state);
                     break;
+                default:
+                    printf("Unknown Opcode: %02X\n", opcode);
+                    exit(0);
+                    break;
             }
             break;
         case 0x1000:
@@ -460,6 +463,10 @@ void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
                 case 0x000E:
                     C8_opcode_8XXE_shift_left(state, opcode);
                     break;
+                default:
+                    printf("Unknown Opcode: %02X\n", opcode);
+                    exit(0);
+                    break;
             }
             break;
         case 0x9000:
@@ -484,6 +491,10 @@ void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
                     break;
                 case 0x00A1:
                     C8_opcode_EXA1_is_key_not_pressed(state, opcode);
+                    break;
+                default:
+                    printf("Unknown Opcode: %02X\n", opcode);
+                    exit(0);
                     break;
             }
             break;
@@ -512,6 +523,10 @@ void C8_execute_opcode(C8_CPU_State *state, int16_t opcode) {
                     break;
                 case 0x0065:
                     C8_opcode_FX65_read_mem(state, opcode);
+                    break;
+                default:
+                    printf("Unknown Opcode: %02X\n", opcode);
+                    exit(0);
                     break;
             }
             break;
