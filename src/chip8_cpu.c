@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <libdragon.h>
 
 const int PROGRAM_OFFSET = 0x200;
 const int FONT_OFFSET = 0x050;
@@ -31,42 +32,6 @@ char fontArray[] = {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-//FILE *logFile;
-
-void C8_print_state(C8_CPU_State *state) {
-//    fprintf(logFile, "%d, %d Timer[%d, %d], Reg[%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d]\n",
-//            state->programCounter,
-//            state->index,
-//            state->delayTimer,
-//            state->soundTimer,
-//            state->registers[0],
-//            state->registers[1],
-//            state->registers[2],
-//            state->registers[3],
-//            state->registers[4],
-//            state->registers[5],
-//            state->registers[6],
-//            state->registers[7],
-//            state->registers[8],
-//            state->registers[9],
-//            state->registers[10],
-//            state->registers[11],
-//            state->registers[12],
-//            state->registers[13],
-//            state->registers[14],
-//            state->registers[15]
-//    );
-}
-
-void C8_print_display_state(C8_CPU_State *state) {
-//    for (int i = 0; i < 32; i++) {
-//        for (int j = 0; j < 64; j++) {
-//            fprintf(logFile, "%d", state->display[i][j]);
-//        }
-//    }
-//    fprintf(logFile, "\n");
-}
-
 void C8_load_font(C8_CPU_State *state, char (*font)[80], char size) {
     memcpy(&state->memory[FONT_OFFSET], font, size);
 }
@@ -77,9 +42,6 @@ void C8_load_program(C8_CPU_State *state, char *program, int programSize) {
 }
 
 void C8_init(C8_CPU_State *state) {
-//    logFile = fopen("test.log", "w"); // a (create) option will allow appending which is useful in a log file
-//    if (logFile == NULL) { exit(0); }
-
     memset(state->registers, 0, sizeof(state->registers));
     memset(state->memory, 0, sizeof(state->memory));
     memset(state->stack, 0, sizeof(state->stack));
@@ -548,6 +510,4 @@ void C8_execute_program(C8_CPU_State *state) {
     if (state->soundTimer > 0) {
         state->soundTimer--;
     }
-
-//    C8_print_state(state);
 }

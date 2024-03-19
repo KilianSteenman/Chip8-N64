@@ -40,7 +40,7 @@ int main(void) {
     debug_init_usblog();
 //    console_set_debug(true);
 
-    printf("Hello N64!\n");
+    fprintf(stdout, "Hello N64!\n");
 
     if (dfs_init(DFS_DEFAULT_LOCATION) != DFS_ESUCCESS) {
         printf("Filesystem failed to start!\n");
@@ -55,8 +55,8 @@ int main(void) {
 //        rom = fopen("rom://1-chip8-logo.ch8", "r");
 //    rom = fopen("rom://2-ibm-logo.ch8", "r");
 //    rom = fopen("rom://3-corax+.ch8", "r");
-//    rom = fopen("rom://4-flags.ch8", "r");
-    rom = fopen("rom://6-keypad.ch8", "r");
+    rom = fopen("rom://4-flags.ch8", "r");
+//    rom = fopen("rom://6-keypad.ch8", "r");
 //    rom = fopen("rom://BC_test.ch8", "r");
 //    rom = fopen("rom://Tetris.ch8", "r");
 //    rom = fopen("rom://Pong.ch8", "r");
@@ -121,10 +121,5 @@ int main(void) {
 //        cpu_state.keys[0xD] = controllers.c[0].Start;
         cpu_state.keys[0xE] = controllers.c[0].L;
         cpu_state.keys[0xF] = controllers.c[0].R;
-//        printf("KEYS ");
-//        for (int i = 0; i <= 0xF; i++) {
-//            printf("%d", cpu_state.keys[i]);
-//        }
-//        printf("\n");
     }
 }
