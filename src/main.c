@@ -1,13 +1,22 @@
 #include <stdio.h>
 #include <libdragon.h>
 
+#include "rom.h"
 #include "file_utils.h"
-#include "chip8_cpu.h"
+#include "chip8.h"
 
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
 #define GRID_SIZE 1 // Size of each grid cell
 #define GRID_SCALE 1
+
+typedef enum {
+    GAME_SELECT,
+    CONTROLLER_SETUP,
+    GAME,
+} State;
+
+State state = GAME_SELECT;
 
 void draw_display(C8_CPU_State *state, display_context_t disp) {
     uint32_t color_off = graphics_make_color(0, 0, 0, 255);
@@ -30,6 +39,42 @@ void draw_display(C8_CPU_State *state, display_context_t disp) {
     }
 }
 
+Rom* loadRom(char* name) {
+    FILE *romFile;
+    char *buffer;
+    long fileLength;
+
+    romFile = fopen(name, "r");
+    if (romFile == NULL) {
+        printf("Unable to open game romFile\n");
+        return NULL;
+    }
+    printf("Opened game romFile\n");
+
+    // Get the size of the romFile
+    fileLength = getFileSize(romFile);
+
+    // Allocate memory for the buffer to store file contents
+    buffer = (char *) malloc(fileLength);
+    if (buffer == NULL) {
+        perror("Memory allocation failed");
+        fclose(romFile);
+        return NULL;
+    }
+    printf("Allocated romFile memory %ld\n", fileLength);
+
+    // Read file contents into the buffer
+    fread(buffer, 1, fileLength, romFile);
+
+    // Cleanup
+    fclose(romFile);
+
+    Rom *rom = malloc(sizeof(Rom));
+    rom->buffer = buffer;
+    rom->fileLength = fileLength;
+    return rom;
+}
+
 int main(void) {
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
     console_init();
@@ -48,48 +93,21 @@ int main(void) {
     }
 
     // Load Rom (TODO: Add rom selection screen)
-    FILE *rom;
-    char *buffer;
-    long fileLength;
-
-//        rom = fopen("rom://1-chip8-logo.ch8", "r");
-//    rom = fopen("rom://2-ibm-logo.ch8", "r");
-//    rom = fopen("rom://3-corax+.ch8", "r");
-    rom = fopen("rom://4-flags.ch8", "r");
-//    rom = fopen("rom://6-keypad.ch8", "r");
-//    rom = fopen("rom://BC_test.ch8", "r");
-//    rom = fopen("rom://Tetris.ch8", "r");
-//    rom = fopen("rom://Pong.ch8", "r");
-    if (rom == NULL) {
-        printf("Unable to open game rom\n");
-        return 1;
-    }
-    printf("Opened game rom\n");
-
-    // Get the size of the rom
-    fileLength = getFileSize(rom);
-
-    // Allocate memory for the buffer to store file contents
-    buffer = (char *) malloc(fileLength);
-    if (buffer == NULL) {
-        perror("Memory allocation failed");
-        fclose(rom);
-        return 1;
-    }
-    printf("Allocated rom memory %ld\n", fileLength);
-
-    // Read file contents into the buffer
-    fread(buffer, 1, fileLength, rom);
-
-    // Cleanup
-    fclose(rom);
+//    loadRom("rom://1-chip8-logo.ch8", buffer);
+//    loadRom("rom://2-ibm-logo.ch8", buffer);
+//    loadRom("rom://3-corax+.ch8", buffer);
+    Rom* rom = loadRom("rom://4-flags.ch8");
+//    loadRom("rom://6-keypad.ch8", buffer);
+//    loadRom("rom://BC_test.ch8", buffer);
+//    loadRom("rom://Tetris.ch8", buffer);
+//    loadRom("rom://Pong.ch8", buffer);
 
     // Init C8
     C8_CPU_State cpu_state;
     printf("Initializing C8\n");
     C8_init(&cpu_state);
     printf("Load program C8\n");
-    C8_load_program(&cpu_state, buffer, fileLength);
+    C8_load_program(&cpu_state, rom);
 
     display_context_t disp;
     while (1) {
@@ -122,4 +140,5 @@ int main(void) {
         cpu_state.keys[0xE] = controllers.c[0].L;
         cpu_state.keys[0xF] = controllers.c[0].R;
     }
+    free(rom);
 }

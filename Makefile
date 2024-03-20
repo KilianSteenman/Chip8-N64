@@ -10,7 +10,8 @@ all: chip-8.z64
 
 OBJS = $(BUILD_DIR)/main.o \
 $(BUILD_DIR)/file_utils.o \
-$(BUILD_DIR)/chip8_cpu.o
+$(BUILD_DIR)/chip8.o \
+$(BUILD_DIR)/rom.o
 
 chip-8.z64: N64_ROM_TITLE="Chip-8"
 chip-8.z64: $(BUILD_DIR)/chip-8.dfs

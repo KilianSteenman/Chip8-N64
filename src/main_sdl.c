@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 
 #include "file_utils.h"
-#include "chip8_cpu.h"
+#include "chip8.h"
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 320

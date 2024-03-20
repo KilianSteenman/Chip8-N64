@@ -2,7 +2,7 @@
 // Created by Shadow-Link on 17/02/2024.
 //
 
-#include "chip8_cpu.h"
+#include "chip8.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -36,8 +36,8 @@ void C8_load_font(C8_CPU_State *state, char (*font)[80], char size) {
     memcpy(&state->memory[FONT_OFFSET], font, size);
 }
 
-void C8_load_program(C8_CPU_State *state, char *program, int programSize) {
-    memcpy(&state->memory[PROGRAM_OFFSET], program, programSize);
+void C8_load_program(C8_CPU_State *state, Rom *rom) {
+    memcpy(&state->memory[PROGRAM_OFFSET], rom->buffer, rom->fileLength);
     state->programCounter = PROGRAM_OFFSET;
 }
 
