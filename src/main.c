@@ -18,6 +18,19 @@ typedef enum {
 
 State state = GAME_SELECT;
 
+char romFiles[8][30] = {
+        "rom://1-chip8-logo.ch8",
+        "rom://2-ibm-logo.ch8",
+        "rom://3-corax+.ch8",
+        "rom://4-flags.ch8",
+        "rom://6-keypad.ch8",
+        "rom://BC_test.ch8",
+        "rom://Tetris.ch8",
+        "rom://Pong.ch8"
+};
+
+int selectedGameIndex = 0;
+
 void draw_display(C8_CPU_State *state, display_context_t disp) {
     uint32_t color_off = graphics_make_color(0, 0, 0, 255);
     uint32_t color_on = graphics_make_color(255, 255, 255, 255);
@@ -39,7 +52,7 @@ void draw_display(C8_CPU_State *state, display_context_t disp) {
     }
 }
 
-Rom* loadRom(char* name) {
+Rom *loadRom(char *name) {
     FILE *romFile;
     char *buffer;
     long fileLength;
@@ -75,6 +88,92 @@ Rom* loadRom(char* name) {
     return rom;
 }
 
+void onGameSelected(C8_CPU_State *cpu_state, char *romFile) {
+    console_clear();
+    console_set_render_mode(RENDER_AUTOMATIC);
+
+    printf("Loading rom %s\n", romFile);
+
+    Rom *rom = loadRom(romFile);
+    if (rom == NULL) {
+        printf("Unable to load rom!\n");
+        return;
+    }
+
+    C8_load_program(cpu_state, rom);
+    free(rom);
+
+    state = GAME;
+}
+
+void executeGameSelect(C8_CPU_State *cpu_state) {
+    console_set_render_mode(RENDER_MANUAL);
+    console_clear();
+    int romFileCount = sizeof(romFiles) / sizeof(romFiles[0]);
+    for (int i = 0; i < romFileCount; i++)
+    {
+        if(i == selectedGameIndex) {
+            printf("- %s\n", romFiles[i]);
+        } else {
+            printf("%s\n", romFiles[i]);
+        }
+    }
+    console_render();
+
+    struct controller_data controllers = get_keys_down();
+    if(controllers.c[0].up) {
+        if(--selectedGameIndex < 0) {
+            selectedGameIndex = 0;
+        }
+    }
+
+    if(controllers.c[0].down) {
+        if(++selectedGameIndex >= romFileCount) {
+            selectedGameIndex = romFileCount - 1;
+        }
+    }
+
+    if(controllers.c[0].A) {
+        onGameSelected(cpu_state, romFiles[selectedGameIndex]);
+    }
+}
+
+void executeGame(C8_CPU_State *cpu_state, struct controller_data controllers) {
+    C8_execute_program(cpu_state);
+
+    display_context_t disp;
+    if (cpu_state->draw == 1) {
+        while (!(disp = display_get()));
+        draw_display(cpu_state, disp);
+        display_show(disp);
+        cpu_state->draw = 0;
+    }
+
+    // Controller check
+    controller_scan();
+    controllers = get_keys_pressed();
+    cpu_state->keys[0x0] = controllers.c[0].C_up;
+    cpu_state->keys[0x1] = controllers.c[0].C_left;
+    cpu_state->keys[0x2] = controllers.c[0].C_down;
+    cpu_state->keys[0x3] = controllers.c[0].C_right;
+    cpu_state->keys[0x4] = controllers.c[0].L;
+    cpu_state->keys[0x5] = controllers.c[0].left;
+    cpu_state->keys[0x6] = controllers.c[0].down;
+    cpu_state->keys[0x7] = controllers.c[0].right;
+    cpu_state->keys[0x8] = controllers.c[0].A;
+    cpu_state->keys[0x9] = controllers.c[0].B;
+    cpu_state->keys[0xA] = controllers.c[0].L;
+    cpu_state->keys[0xB] = controllers.c[0].R;
+    cpu_state->keys[0xC] = controllers.c[0].Z;
+    cpu_state->keys[0xE] = controllers.c[0].L;
+    cpu_state->keys[0xF] = controllers.c[0].R;
+
+    // TODO: Add some kind of start menu
+    if(controllers.c[0].start) {
+        state = GAME_SELECT;
+    }
+}
+
 int main(void) {
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
     console_init();
@@ -92,53 +191,25 @@ int main(void) {
         return 1;
     }
 
-    // Load Rom (TODO: Add rom selection screen)
-//    loadRom("rom://1-chip8-logo.ch8", buffer);
-//    loadRom("rom://2-ibm-logo.ch8", buffer);
-//    loadRom("rom://3-corax+.ch8", buffer);
-    Rom* rom = loadRom("rom://4-flags.ch8");
-//    loadRom("rom://6-keypad.ch8", buffer);
-//    loadRom("rom://BC_test.ch8", buffer);
-//    loadRom("rom://Tetris.ch8", buffer);
-//    loadRom("rom://Pong.ch8", buffer);
-
     // Init C8
     C8_CPU_State cpu_state;
     printf("Initializing C8\n");
     C8_init(&cpu_state);
-    printf("Load program C8\n");
-    C8_load_program(&cpu_state, rom);
 
-    display_context_t disp;
     while (1) {
-        C8_execute_program(&cpu_state);
-
-        if (cpu_state.draw == 1) {
-            while (!(disp = display_get()));
-            draw_display(&cpu_state, disp);
-            display_show(disp);
-            cpu_state.draw = 0;
-        }
-
-        // Controller check
         controller_scan();
-        controllers = get_keys_pressed();
-        cpu_state.keys[0x0] = controllers.c[0].C_up;
-        cpu_state.keys[0x1] = controllers.c[0].C_left;
-        cpu_state.keys[0x2] = controllers.c[0].C_down;
-        cpu_state.keys[0x3] = controllers.c[0].C_right;
-        cpu_state.keys[0x4] = controllers.c[0].L;
-        cpu_state.keys[0x5] = controllers.c[0].left;
-        cpu_state.keys[0x6] = controllers.c[0].down;
-        cpu_state.keys[0x7] = controllers.c[0].right;
-        cpu_state.keys[0x8] = controllers.c[0].A;
-        cpu_state.keys[0x9] = controllers.c[0].B;
-        cpu_state.keys[0xA] = controllers.c[0].L;
-        cpu_state.keys[0xB] = controllers.c[0].R;
-        cpu_state.keys[0xC] = controllers.c[0].Z;
-//        cpu_state.keys[0xD] = controllers.c[0].Start;
-        cpu_state.keys[0xE] = controllers.c[0].L;
-        cpu_state.keys[0xF] = controllers.c[0].R;
+//        controllers = get_keys_pressed();
+
+        switch (state) {
+            case GAME_SELECT:
+                executeGameSelect(&cpu_state);
+                break;
+            case GAME:
+                executeGame(&cpu_state, controllers);
+                break;
+            default:
+                printf("Unsupported state: %d\n", state);
+                return 1;
+        }
     }
-    free(rom);
 }
