@@ -5,6 +5,7 @@
 #include "rom.h"
 #include "file_utils.h"
 #include "chip8.h"
+#include "input.h"
 
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
@@ -30,7 +31,7 @@ char romFiles[8][30] = {
         "rom://Pong.ch8"
 };
 
-int selectedGameIndex = 0;
+int selected_game_index = 0;
 
 void draw_display(C8_CPU_State *state, display_context_t disp) {
     uint32_t color_off = graphics_make_color(0, 0, 0, 255);
@@ -142,7 +143,7 @@ void execute_game_select(C8_CPU_State *cpu_state) {
     int romFileCount = sizeof(romFiles) / sizeof(romFiles[0]);
     for (int i = 0; i < romFileCount; i++)
     {
-        if(i == selectedGameIndex) {
+        if(i == selected_game_index) {
             printf("- %s\n", romFiles[i]);
         } else {
             printf("%s\n", romFiles[i]);
@@ -152,19 +153,19 @@ void execute_game_select(C8_CPU_State *cpu_state) {
 
     struct controller_data controllers = get_keys_down();
     if(controllers.c[0].up) {
-        if(--selectedGameIndex < 0) {
-            selectedGameIndex = 0;
+        if(--selected_game_index < 0) {
+            selected_game_index = 0;
         }
     }
 
     if(controllers.c[0].down) {
-        if(++selectedGameIndex >= romFileCount) {
-            selectedGameIndex = romFileCount - 1;
+        if(++selected_game_index >= romFileCount) {
+            selected_game_index = romFileCount - 1;
         }
     }
 
     if(controllers.c[0].A) {
-        on_game_selected(cpu_state, romFiles[selectedGameIndex]);
+        on_game_selected(cpu_state, romFiles[selected_game_index]);
     }
 }
 
