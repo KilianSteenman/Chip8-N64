@@ -33,7 +33,7 @@ char romFiles[8][30] = {
 
 int selected_game_index = 0;
 
-void draw_display(C8_CPU_State *state, display_context_t disp) {
+void draw_display(C8_State *state, display_context_t disp) {
     uint32_t color_off = graphics_make_color(0, 0, 0, 255);
     uint32_t color_on = graphics_make_color(255, 255, 255, 255);
 
@@ -117,7 +117,7 @@ Rom *load_rom(char *name) {
     return rom;
 }
 
-void on_game_selected(C8_CPU_State *cpu_state, char *romFile) {
+void on_game_selected(C8_State *cpu_state, char *romFile) {
     console_clear();
     console_set_render_mode(RENDER_AUTOMATIC);
 
@@ -137,7 +137,7 @@ void on_game_selected(C8_CPU_State *cpu_state, char *romFile) {
     state = GAME;
 }
 
-void execute_game_select(C8_CPU_State *cpu_state) {
+void execute_game_select(C8_State *cpu_state) {
     console_set_render_mode(RENDER_MANUAL);
     console_clear();
     int romFileCount = sizeof(romFiles) / sizeof(romFiles[0]);
@@ -169,7 +169,7 @@ void execute_game_select(C8_CPU_State *cpu_state) {
     }
 }
 
-void execute_game(C8_CPU_State *cpu_state, struct controller_data controllers) {
+void execute_game(C8_State *cpu_state, struct controller_data controllers) {
     C8_execute_program(cpu_state);
 
     display_context_t disp;
@@ -223,7 +223,7 @@ int main(void) {
     }
 
     // Init C8
-    C8_CPU_State cpu_state;
+    C8_State cpu_state;
     printf("Initializing C8\n");
     C8_init(&cpu_state);
 

@@ -3,6 +3,7 @@
 //
 
 #include "input.h"
+#include "chip8.h"
 
 bool is_button_pressed(struct controller_data controllers, int controller_index, Button button) {
     switch(button) {
@@ -49,5 +50,13 @@ bool is_button_pressed(struct controller_data controllers, int controller_index,
             printf("Unknown button");
             exit(0);
             break;
+    }
+}
+
+void update_button_states(C8_State c8_state, KeyMap key_map, struct controller_data controllers) {
+    for(int i = 0; i < 0xF; i++) {
+        if(key_map.key[i] != 0xFF) {
+            c8_state.keys[i] = is_button_pressed(controllers, key_map.key[i] & 0xF, key_map.key[i] >> 4 & 0xF);
+        }
     }
 }

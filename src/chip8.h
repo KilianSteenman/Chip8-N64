@@ -25,10 +25,10 @@ typedef struct {
     uint8_t memory[4096];
 
     uint8_t display[32][64];
-} C8_CPU_State;
+} C8_State;
 
-void C8_init(C8_CPU_State *state);
-void C8_load_program(C8_CPU_State *state, Rom *rom);
-void C8_execute_program(C8_CPU_State* state);
+void C8_init(C8_State *state);
+void C8_load_program(C8_State *state, Rom *rom);
+void C8_execute_program(C8_State* state);
 
 #endif //CHIP_8_CHIP8_H
