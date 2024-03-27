@@ -73,6 +73,7 @@ void load_controller_config(char *name) {
     configFile = fopen(name, "r");
     if (configFile == NULL) {
         printf("Unable to open config file\n");
+        state = CONTROLLER_SETUP;
         return;
     }
 
@@ -134,7 +135,55 @@ void on_game_selected(C8_State *cpu_state, char *romFile) {
 
     load_controller_config(romFile);
 
-    state = GAME;
+//    state = GAME;
+}
+
+int selected_button_index = 0;
+int is_in_config_mode = 0;
+
+void execute_controller_config() {
+    console_set_render_mode(RENDER_MANUAL);
+    console_clear();
+    printf("controller config\n");
+    for (int i = 0; i <= 0xF; i++)
+    {
+        if(i == selected_button_index) {
+            printf("- %X\n", i);
+        } else {
+            printf("%X\n", i);
+        }
+    }
+
+    if(is_in_config_mode == 0) {
+        struct controller_data controllers = get_keys_down();
+        if (controllers.c[0].up) {
+            if (--selected_button_index < 0) {
+                selected_button_index = 0;
+            }
+        }
+
+        if (controllers.c[0].down) {
+            if (++selected_button_index > 0xF) {
+                selected_button_index = 0xF;
+            }
+        }
+
+        if (controllers.c[0].A) {
+            is_in_config_mode = 1;
+        }
+    } else {
+        struct controller_data controllers = get_keys_down();
+        for(int i = 0; i < 4; i++) {
+            for(int button = 0; button < 12; button++) {
+                if(is_button_pressed(controllers, i, button)) {
+                    printf("Pressed [%d][%d]", i, button);
+                    break;
+                }
+            }
+        }
+    }
+
+    console_render();
 }
 
 void execute_game_select(C8_State *cpu_state) {
@@ -234,6 +283,9 @@ int main(void) {
         switch (state) {
             case GAME_SELECT:
                 execute_game_select(&cpu_state);
+                break;
+            case CONTROLLER_SETUP:
+                execute_controller_config();
                 break;
             case GAME:
                 execute_game(&cpu_state, controllers);

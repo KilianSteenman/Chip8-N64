@@ -30,6 +30,7 @@ typedef struct {
     uint8_t key[0xF];
 } KeyMap;
 
+bool is_button_pressed(struct controller_data controllers, int controller_index, Button button);
 void update_button_states(C8_State c8_state, KeyMap key_map, struct controller_data controllers);
 
 #endif //CHIP_8_INPUT_H
