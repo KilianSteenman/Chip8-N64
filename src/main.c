@@ -134,8 +134,6 @@ void on_game_selected(C8_State *cpu_state, char *romFile) {
     free(rom);
 
     load_controller_config(romFile);
-
-//    state = GAME;
 }
 
 int selected_button_index = 0;
@@ -147,16 +145,15 @@ void execute_controller_config() {
     console_set_render_mode(RENDER_MANUAL);
     console_clear();
     printf("controller config\n");
-    for (int i = 0; i <= 0xF; i++)
-    {
-        if(i == selected_button_index) {
+    for (int i = 0; i <= 0xF; i++) {
+        if (i == selected_button_index) {
             printf("- %X: %d\n", i, key_map.key[i]);
         } else {
             printf("%X: %d\n", i, key_map.key[i]);
         }
     }
 
-    if(is_in_config_mode == 0) {
+    if (is_in_config_mode == 0) {
         struct controller_data controllers = get_keys_down();
         if (controllers.c[0].up) {
             if (--selected_button_index < 0) {
@@ -179,10 +176,9 @@ void execute_controller_config() {
         }
     } else {
         struct controller_data controllers = get_keys_down();
-        for(int controller_index = 0; controller_index < 4; controller_index++) {
-            for(int button_index = 0; button_index < 12; button_index++) {
-                if(is_button_pressed(controllers, controller_index, button_index)) {
-                    printf("Pressed [%d][%d]", controller_index, button_index);
+        for (int controller_index = 0; controller_index < 4; controller_index++) {
+            for (int button_index = 0; button_index < 12; button_index++) {
+                if (is_button_pressed(controllers, controller_index, button_index)) {
                     set_key_map_key(&key_map, selected_button_index, controller_index, button_index);
                     is_in_config_mode = 0;
                     break;
@@ -198,9 +194,8 @@ void execute_game_select(C8_State *cpu_state) {
     console_set_render_mode(RENDER_MANUAL);
     console_clear();
     int romFileCount = sizeof(romFiles) / sizeof(romFiles[0]);
-    for (int i = 0; i < romFileCount; i++)
-    {
-        if(i == selected_game_index) {
+    for (int i = 0; i < romFileCount; i++) {
+        if (i == selected_game_index) {
             printf("- %s\n", romFiles[i]);
         } else {
             printf("%s\n", romFiles[i]);
@@ -209,19 +204,19 @@ void execute_game_select(C8_State *cpu_state) {
     console_render();
 
     struct controller_data controllers = get_keys_down();
-    if(controllers.c[0].up) {
-        if(--selected_game_index < 0) {
+    if (controllers.c[0].up) {
+        if (--selected_game_index < 0) {
             selected_game_index = 0;
         }
     }
 
-    if(controllers.c[0].down) {
-        if(++selected_game_index >= romFileCount) {
+    if (controllers.c[0].down) {
+        if (++selected_game_index >= romFileCount) {
             selected_game_index = romFileCount - 1;
         }
     }
 
-    if(controllers.c[0].A) {
+    if (controllers.c[0].A) {
         on_game_selected(cpu_state, romFiles[selected_game_index]);
     }
 }
@@ -237,13 +232,13 @@ void execute_game(C8_State *cpu_state, struct controller_data controllers) {
         cpu_state->draw = 0;
     }
 
-    // Controller check
-    controller_scan();
+    // Update key states
     controllers = get_keys_pressed();
     update_button_states(cpu_state, key_map, controllers);
 
+    // Start menu
     controllers = get_keys_down();
-    if(controllers.c[0].start) {
+    if (controllers.c[0].start) {
         state = GAME_SELECT;
     }
 }
@@ -272,7 +267,6 @@ int main(void) {
 
     while (1) {
         controller_scan();
-//        controllers = get_keys_pressed();
 
         switch (state) {
             case GAME_SELECT:
