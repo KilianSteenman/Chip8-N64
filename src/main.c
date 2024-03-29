@@ -173,6 +173,10 @@ void execute_controller_config() {
         if (controllers.c[0].A) {
             is_in_config_mode = 1;
         }
+
+        if (controllers.c[0].start) {
+            state = GAME;
+        }
     } else {
         struct controller_data controllers = get_keys_down();
         for(int controller_index = 0; controller_index < 4; controller_index++) {
@@ -236,23 +240,9 @@ void execute_game(C8_State *cpu_state, struct controller_data controllers) {
     // Controller check
     controller_scan();
     controllers = get_keys_pressed();
-    cpu_state->keys[0x0] = controllers.c[0].C_up;
-    cpu_state->keys[0x1] = controllers.c[0].C_left;
-    cpu_state->keys[0x2] = controllers.c[0].C_down;
-    cpu_state->keys[0x3] = controllers.c[0].C_right;
-    cpu_state->keys[0x4] = controllers.c[0].L;
-    cpu_state->keys[0x5] = controllers.c[0].left;
-    cpu_state->keys[0x6] = controllers.c[0].down;
-    cpu_state->keys[0x7] = controllers.c[0].right;
-    cpu_state->keys[0x8] = controllers.c[0].A;
-    cpu_state->keys[0x9] = controllers.c[0].B;
-    cpu_state->keys[0xA] = controllers.c[0].L;
-    cpu_state->keys[0xB] = controllers.c[0].R;
-    cpu_state->keys[0xC] = controllers.c[0].Z;
-    cpu_state->keys[0xE] = controllers.c[0].L;
-    cpu_state->keys[0xF] = controllers.c[0].R;
+    update_button_states(cpu_state, key_map, controllers);
 
-    // TODO: Add some kind of start menu
+    controllers = get_keys_down();
     if(controllers.c[0].start) {
         state = GAME_SELECT;
     }
