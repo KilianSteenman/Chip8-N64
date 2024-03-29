@@ -53,10 +53,15 @@ bool is_button_pressed(struct controller_data controllers, int controller_index,
     }
 }
 
-void update_button_states(C8_State c8_state, KeyMap key_map, struct controller_data controllers) {
+void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_data controllers) {
     for(int i = 0; i < 0xF; i++) {
         if(key_map.key[i] != 0xFF) {
-            c8_state.keys[i] = is_button_pressed(controllers, key_map.key[i] & 0xF, key_map.key[i] >> 4 & 0xF);
+            c8_state->keys[i] = is_button_pressed(controllers, key_map.key[i] & 0xF, key_map.key[i] >> 4 & 0xF);
         }
     }
+}
+
+void set_key_map_key(KeyMap *key_map, int key, int controller_index, int button_index) {
+    uint8_t binding = (button_index << 4) | controller_index;
+    key_map->key[key] = binding;
 }
