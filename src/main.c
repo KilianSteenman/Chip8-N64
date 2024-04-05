@@ -183,7 +183,7 @@ void execute_controller_config() {
         for (int controller_index = 0; controller_index < 4; controller_index++) {
             for (int button_index = 0; button_index < 12; button_index++) {
                 if (is_button_pressed(controllers, controller_index, button_index)) {
-                    set_key_map_key(&key_map, selected_button_index, controller_index, button_index);
+                    set_key_binding(&key_map, selected_button_index, controller_index, button_index);
                     is_in_config_mode = 0;
                     break;
                 }

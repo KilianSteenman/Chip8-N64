@@ -77,7 +77,7 @@ void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_
     }
 }
 
-void set_key_map_key(KeyMap *key_map, int key, int controller_index, int button_index) {
+void set_key_binding(KeyMap *key_map, int key, int controller_index, int button_index) {
     uint8_t binding = (button_index << 4) | controller_index;
     key_map->key[key] = binding;
 }

@@ -36,6 +36,6 @@ bool is_button_pressed(struct controller_data controllers, int controller_index,
 
 void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_data controllers);
 
-void set_key_map_key(KeyMap *key_map, int key, int controller_index, int button_index);
+void set_key_binding(KeyMap *key_map, int key, int controller_index, int button_index);
 
 #endif //CHIP_8_INPUT_H
