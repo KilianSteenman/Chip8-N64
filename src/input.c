@@ -5,8 +5,24 @@
 #include "input.h"
 #include "chip8.h"
 
+const char button_names[13][10] = {
+        "A",
+        "B",
+        "L",
+        "R",
+        "Z",
+        "Up",
+        "Down",
+        "Left",
+        "Right",
+        "C-Up",
+        "C-Down",
+        "C-Left",
+        "C-Right"
+};
+
 bool is_button_pressed(struct controller_data controllers, int controller_index, Button button) {
-    switch(button) {
+    switch (button) {
         case A:
             return controllers.c[controller_index].A;
             break;
@@ -54,8 +70,8 @@ bool is_button_pressed(struct controller_data controllers, int controller_index,
 }
 
 void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_data controllers) {
-    for(int i = 0; i < 0xF; i++) {
-        if(key_map.key[i] != 0xFF) {
+    for (int i = 0; i < 0xF; i++) {
+        if (key_map.key[i] != 0xFF) {
             c8_state->keys[i] = is_button_pressed(controllers, key_map.key[i] & 0xF, key_map.key[i] >> 4 & 0xF);
         }
     }

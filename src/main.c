@@ -145,11 +145,15 @@ void execute_controller_config() {
     console_set_render_mode(RENDER_MANUAL);
     console_clear();
     printf("controller config\n");
-    for (int i = 0; i <= 0xF; i++) {
+    printf("Input\tController\tButton\n");
+    for (int i = 0; i < 0xF; i++) {
+        int controller_index = key_map.key[i] & 0xF;
+        int button_index = key_map.key[i] >> 4;
+
         if (i == selected_button_index) {
-            printf("- %X: %d\n", i, key_map.key[i]);
+            printf("- %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
         } else {
-            printf("%X: %d\n", i, key_map.key[i]);
+            printf("  %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
         }
     }
 

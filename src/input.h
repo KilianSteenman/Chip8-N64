@@ -26,11 +26,14 @@ typedef enum {
     C_Right
 } Button;
 
+extern const char button_names[13][10];
+
 typedef struct {
     uint8_t key[0xF];
 } KeyMap;
 
 bool is_button_pressed(struct controller_data controllers, int controller_index, Button button);
+
 void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_data controllers);
 
 void set_key_map_key(KeyMap *key_map, int key, int controller_index, int button_index);
