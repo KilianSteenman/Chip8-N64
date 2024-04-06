@@ -20,6 +20,8 @@ typedef enum {
 
 State state = GAME_SELECT;
 
+KeyMap key_map;
+
 char romFiles[8][30] = {
         "rom://1-chip8-logo.ch8",
         "rom://2-ibm-logo.ch8",
@@ -74,6 +76,7 @@ void load_controller_config(char *name) {
     if (configFile == NULL) {
         printf("Unable to open config file\n");
         state = CONTROLLER_SETUP;
+        init_key_map(&key_map);
         return;
     }
 
@@ -139,21 +142,27 @@ void on_game_selected(C8_State *cpu_state, char *romFile) {
 int selected_button_index = 0;
 int is_in_config_mode = 0;
 
-KeyMap key_map;
-
 void execute_controller_config() {
     console_set_render_mode(RENDER_MANUAL);
     console_clear();
     printf("controller config\n");
     printf("Input\tController\tButton\n");
-    for (int i = 0; i < 0xF; i++) {
-        int controller_index = key_map.key[i] & 0xF;
-        int button_index = key_map.key[i] >> 4;
-
-        if (i == selected_button_index) {
-            printf("- %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
+    for (int i = 0; i < sizeof(key_map.key); i++) {
+        if(key_map.key[i] == KEY_BINDING_NOT_SET) {
+            if (i == selected_button_index) {
+                printf("- %X\t\t%s\t\t\t%s\n", i, "-", "-");
+            } else {
+                printf("  %X\t\t%s\t\t\t%s\n", i, "-", "-");
+            }
         } else {
-            printf("  %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
+            int controller_index = key_map.key[i] & 0xF;
+            int button_index = key_map.key[i] >> 4;
+
+            if (i == selected_button_index) {
+                printf("- %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
+            } else {
+                printf("  %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
+            }
         }
     }
 

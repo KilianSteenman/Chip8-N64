@@ -5,6 +5,8 @@
 #include "input.h"
 #include "chip8.h"
 
+const uint8_t KEY_BINDING_NOT_SET = 0xFF;
+
 const char button_names[13][10] = {
         "A",
         "B",
@@ -70,8 +72,8 @@ bool is_button_pressed(struct controller_data controllers, int controller_index,
 }
 
 void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_data controllers) {
-    for (int i = 0; i < 0xF; i++) {
-        if (key_map.key[i] != 0xFF) {
+    for (int i = 0; i < sizeof(key_map.key); i++) {
+        if (key_map.key[i] != KEY_BINDING_NOT_SET) {
             c8_state->keys[i] = is_button_pressed(controllers, key_map.key[i] & 0xF, key_map.key[i] >> 4 & 0xF);
         }
     }
@@ -80,4 +82,10 @@ void update_button_states(C8_State *c8_state, KeyMap key_map, struct controller_
 void set_key_binding(KeyMap *key_map, int key, int controller_index, int button_index) {
     uint8_t binding = (button_index << 4) | controller_index;
     key_map->key[key] = binding;
+}
+
+void init_key_map(KeyMap *key_map) {
+    for(int i = 0; i < sizeof(key_map->key); i++) {
+        key_map->key[i] = KEY_BINDING_NOT_SET;
+    }
 }
