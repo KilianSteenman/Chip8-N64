@@ -59,18 +59,6 @@ void draw_display(C8_State *state, display_context_t disp) {
     }
 }
 
-void replace_extension(char *filepath, const char *new_extension) {
-    char *dot = strrchr(filepath, '.');
-    if (dot != NULL) {
-        // Found the extension, replace it with the new one
-        strcpy(dot + 1, new_extension);
-    } else {
-        // No extension found, append the new extension
-        strcat(filepath, ".");
-        strcat(filepath, new_extension);
-    }
-}
-
 void store_binding(char *name, KeyMap *key_map) {
     // Create and allocate memory for an 32-byte buffer
     uint8_t *buffer = malloc(32 * sizeof(uint8_t));
