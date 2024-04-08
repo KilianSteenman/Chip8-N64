@@ -19,6 +19,8 @@ assets/
 # N64 Save formats
 *.srm
 *.eep
+*.eeprom
+*.pak
 
 # Logs
 *.log

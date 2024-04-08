@@ -16,6 +16,7 @@ $(BUILD_DIR)/input.o
 
 chip-8.z64: N64_ROM_TITLE="Chip-8"
 chip-8.z64: $(BUILD_DIR)/chip-8.dfs
+chip-8.z64: N64_ED64ROMCONFIGFLAGS=-w eeprom16k
 
 $(BUILD_DIR)/chip-8.elf: $(OBJS)
 $(BUILD_DIR)/chip-8.dfs: $(wildcard filesystem/*)

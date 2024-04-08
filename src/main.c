@@ -68,7 +68,55 @@ void replace_extension(char *filepath, const char *new_extension) {
     }
 }
 
+void store_binding(char *name, KeyMap *key_map) {
+    // Create and allocate memory for an 32-byte buffer
+    uint8_t *buffer = malloc(32 * sizeof(uint8_t));
+    // Use the first 16 bytes to store the filename
+    for (int i = 0; i < 16; i++) {
+        buffer[i] = name[i];
+    }
+    // Use the second 16 bytes to store the keymap
+    for (int i = 0; i < 16; i++) {
+        buffer[i + 16] = key_map->key[i];
+    }
+    eeprom_write_bytes(buffer, 0, 32);
+}
+
 void load_controller_config(char *name) {
+    // When running on a flash cart we should probably save to a file
+    // For now we save to eeprom
+
+    // Create and allocate memory for an 32-byte buffer
+    uint8_t *buffer = malloc(32 * sizeof(uint8_t));
+
+    // Load the data from block 0 to the buffer
+    eeprom_read_bytes(buffer, 0, 32);
+    printf("\n");
+    for (int i = 0; i < 32; i++) {
+        printf("%x ", buffer[i]);
+    }
+    printf("\n");
+    bool matches = true;
+    for (int i = 0; i < 16; i++) {
+        if (buffer[i] != name[i]) {
+            matches = false;
+        }
+    }
+    if (matches) {
+        printf("Matches\n");
+    } else {
+        printf("No match\n");
+        init_key_map(&key_map);
+        store_binding(name, &key_map);
+
+//        for (int i = 0; i < 8; i++) {
+//            buffer[i] = name[i];
+//        }
+//        eeprom_write_bytes(buffer, 0, 8);
+    }
+    while (1);
+
+
     replace_extension(name, "c8s");
 
     FILE *configFile;
@@ -107,7 +155,7 @@ Rom *load_rom(char *name) {
         fclose(romFile);
         return NULL;
     }
-    printf("Allocated romFile memory %ld\n", fileLength);
+    printf("Allocated rom\nFile memory %ld\n", fileLength);
 
     // Read file contents into the buffer
     fread(buffer, 1, fileLength, romFile);
@@ -148,7 +196,7 @@ void execute_controller_config() {
     printf("controller config\n");
     printf("Input\tController\tButton\n");
     for (int i = 0; i < sizeof(key_map.key); i++) {
-        if(key_map.key[i] == KEY_BINDING_NOT_SET) {
+        if (key_map.key[i] == KEY_BINDING_NOT_SET) {
             if (i == selected_button_index) {
                 printf("- %X\t\t%s\t\t\t%s\n", i, "-", "-");
             } else {
@@ -267,6 +315,10 @@ int main(void) {
 //    console_set_debug(true);
 
     fprintf(stdout, "Hello N64!\n");
+
+    eeprom_type_t type = eeprom_present();
+    size_t size = eeprom_total_blocks();
+    printf("eeprom %d size %d\n", type, size);
 
     if (dfs_init(DFS_DEFAULT_LOCATION) != DFS_ESUCCESS) {
         printf("Filesystem failed to start!\n");
