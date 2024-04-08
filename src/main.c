@@ -6,6 +6,7 @@
 #include "file_utils.h"
 #include "chip8.h"
 #include "input.h"
+#include "screen_rom_select.h"
 
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
@@ -123,23 +124,6 @@ void load_controller_config(char *name) {
     }
 
     free(buffer);
-//    while (1);
-
-
-//    replace_extension(name, "c8s");
-//
-//    FILE *configFile;
-//    configFile = fopen(name, "r");
-//    if (configFile == NULL) {
-//        printf("Unable to open config file\n");
-//        state = CONTROLLER_SETUP;
-//        init_key_map(&key_map);
-//        return;
-//    }
-//
-//    printf("Loading settings %s\n", name);
-//
-//    fclose(configFile);
 }
 
 Rom *load_rom(char *name) {
@@ -178,7 +162,7 @@ Rom *load_rom(char *name) {
     return rom;
 }
 
-void on_game_selected(C8_State *cpu_state, char *romFile) {
+void on_rom_selected(C8_State *cpu_state, char *romFile) {
     console_clear();
     console_set_render_mode(RENDER_AUTOMATIC);
 
@@ -262,36 +246,35 @@ void execute_controller_config() {
     console_render();
 }
 
-void execute_game_select(C8_State *cpu_state) {
-    console_set_render_mode(RENDER_MANUAL);
-    console_clear();
-    int romFileCount = sizeof(romFiles) / sizeof(romFiles[0]);
-    for (int i = 0; i < romFileCount; i++) {
-        if (i == selected_game_index) {
-            printf("- %s\n", romFiles[i]);
-        } else {
-            printf("%s\n", romFiles[i]);
-        }
-    }
-    console_render();
-
-    struct controller_data controllers = get_keys_down();
-    if (controllers.c[0].up) {
-        if (--selected_game_index < 0) {
-            selected_game_index = 0;
-        }
-    }
-
-    if (controllers.c[0].down) {
-        if (++selected_game_index >= romFileCount) {
-            selected_game_index = romFileCount - 1;
-        }
-    }
-
-    if (controllers.c[0].A) {
-        on_game_selected(cpu_state, romFiles[selected_game_index]);
-    }
-}
+//void execute_rom_select(C8_State *cpu_state, char rom_files[][30], int rom_count) {
+//    console_set_render_mode(RENDER_MANUAL);
+//    console_clear();
+//    for (int i = 0; i < rom_count; i++) {
+//        if (i == selected_game_index) {
+//            printf("- %s\n", rom_files[i]);
+//        } else {
+//            printf("%s\n", rom_files[i]);
+//        }
+//    }
+//    console_render();
+//
+//    struct controller_data controllers = get_keys_down();
+//    if (controllers.c[0].up) {
+//        if (--selected_game_index < 0) {
+//            selected_game_index = 0;
+//        }
+//    }
+//
+//    if (controllers.c[0].down) {
+//        if (++selected_game_index >= rom_count) {
+//            selected_game_index = rom_count - 1;
+//        }
+//    }
+//
+//    if (controllers.c[0].A) {
+//        on_rom_selected(cpu_state, rom_files[selected_game_index]);
+//    }
+//}
 
 void execute_game(C8_State *cpu_state, struct controller_data controllers) {
     C8_execute_program(cpu_state);
@@ -346,7 +329,10 @@ int main(void) {
 
         switch (state) {
             case GAME_SELECT:
-                execute_game_select(&cpu_state);
+                int rom_count = sizeof(romFiles) / sizeof(romFiles[0]);
+                if(execute_rom_select(romFiles, rom_count, &selected_game_index)) {
+                    on_rom_selected(&cpu_state, romFiles[selected_game_index]);
+                }
                 break;
             case CONTROLLER_SETUP:
                 execute_controller_config();
