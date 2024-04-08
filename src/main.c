@@ -19,6 +19,7 @@ typedef enum {
 } State;
 
 State state = GAME_SELECT;
+char *selected_rom_name;
 
 KeyMap key_map;
 
@@ -80,6 +81,14 @@ void store_binding(char *name, KeyMap *key_map) {
         buffer[i + 16] = key_map->key[i];
     }
     eeprom_write_bytes(buffer, 0, 32);
+    free(buffer);
+}
+
+void load_binding(uint8_t *buffer, KeyMap *key_map) {
+    // Use the second 16 bytes to load the keymap
+    for (int i = 0; i < 16; i++) {
+        key_map->key[i] = buffer[i + 16];
+    }
 }
 
 void load_controller_config(char *name) {
@@ -104,33 +113,33 @@ void load_controller_config(char *name) {
     }
     if (matches) {
         printf("Matches\n");
+        load_binding(buffer, &key_map);
+        state = GAME;
     } else {
         printf("No match\n");
-        init_key_map(&key_map);
-        store_binding(name, &key_map);
-
-//        for (int i = 0; i < 8; i++) {
-//            buffer[i] = name[i];
-//        }
-//        eeprom_write_bytes(buffer, 0, 8);
-    }
-    while (1);
-
-
-    replace_extension(name, "c8s");
-
-    FILE *configFile;
-    configFile = fopen(name, "r");
-    if (configFile == NULL) {
-        printf("Unable to open config file\n");
         state = CONTROLLER_SETUP;
         init_key_map(&key_map);
-        return;
+        selected_rom_name = name;
     }
 
-    printf("Loading settings %s\n", name);
+    free(buffer);
+//    while (1);
 
-    fclose(configFile);
+
+//    replace_extension(name, "c8s");
+//
+//    FILE *configFile;
+//    configFile = fopen(name, "r");
+//    if (configFile == NULL) {
+//        printf("Unable to open config file\n");
+//        state = CONTROLLER_SETUP;
+//        init_key_map(&key_map);
+//        return;
+//    }
+//
+//    printf("Loading settings %s\n", name);
+//
+//    fclose(configFile);
 }
 
 Rom *load_rom(char *name) {
@@ -173,6 +182,7 @@ void on_game_selected(C8_State *cpu_state, char *romFile) {
     console_clear();
     console_set_render_mode(RENDER_AUTOMATIC);
 
+    selected_rom_name = romFile;
     printf("Loading rom %s\n", romFile);
 
     Rom *rom = load_rom(romFile);
@@ -233,6 +243,7 @@ void execute_controller_config() {
         }
 
         if (controllers.c[0].start) {
+            store_binding(selected_rom_name, &key_map);
             state = GAME;
         }
     } else {
