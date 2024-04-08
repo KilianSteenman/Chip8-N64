@@ -34,7 +34,4 @@ bool execute_rom_select(char rom_files[][30], int rom_count, int *selected_game_
     }
 
     return controllers.c[0].A;
-//    if (controllers.c[0].A) {
-//        on_game_selected(cpu_state, rom_files[selected_game_index]);
-//    }
 }

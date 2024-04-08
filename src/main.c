@@ -246,36 +246,6 @@ void execute_controller_config() {
     console_render();
 }
 
-//void execute_rom_select(C8_State *cpu_state, char rom_files[][30], int rom_count) {
-//    console_set_render_mode(RENDER_MANUAL);
-//    console_clear();
-//    for (int i = 0; i < rom_count; i++) {
-//        if (i == selected_game_index) {
-//            printf("- %s\n", rom_files[i]);
-//        } else {
-//            printf("%s\n", rom_files[i]);
-//        }
-//    }
-//    console_render();
-//
-//    struct controller_data controllers = get_keys_down();
-//    if (controllers.c[0].up) {
-//        if (--selected_game_index < 0) {
-//            selected_game_index = 0;
-//        }
-//    }
-//
-//    if (controllers.c[0].down) {
-//        if (++selected_game_index >= rom_count) {
-//            selected_game_index = rom_count - 1;
-//        }
-//    }
-//
-//    if (controllers.c[0].A) {
-//        on_rom_selected(cpu_state, rom_files[selected_game_index]);
-//    }
-//}
-
 void execute_game(C8_State *cpu_state, struct controller_data controllers) {
     C8_execute_program(cpu_state);
 
