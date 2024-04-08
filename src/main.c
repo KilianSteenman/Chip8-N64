@@ -8,11 +8,7 @@
 #include "input.h"
 #include "screen_controller_config.h"
 #include "screen_rom_select.h"
-
-#define SCREEN_WIDTH 64
-#define SCREEN_HEIGHT 32
-#define GRID_SIZE 1 // Size of each grid cell
-#define GRID_SCALE 1
+#include "screen_rom_execution.h"
 
 typedef enum {
     ROM_SELECT,
@@ -37,27 +33,6 @@ char romFiles[8][30] = {
 };
 
 int selected_game_index = 0;
-
-void draw_display(C8_State *state, display_context_t disp) {
-    uint32_t color_off = graphics_make_color(0, 0, 0, 255);
-    uint32_t color_on = graphics_make_color(255, 255, 255, 255);
-
-    for (int x = 0; x < SCREEN_WIDTH; x += GRID_SIZE) {
-        for (int y = 0; y < SCREEN_HEIGHT; y += GRID_SIZE) {
-
-            int xOffset = x / GRID_SCALE;
-            int yOffset = y / GRID_SCALE;
-
-            uint32_t color;
-            if (state->display[yOffset][xOffset]) {
-                color = color_on;
-            } else {
-                color = color_off;
-            }
-            graphics_draw_pixel(disp, x + 350, y, color);
-        }
-    }
-}
 
 void load_controller_config(char *name) {
     // When running on a flash cart we should probably save to a file
@@ -148,28 +123,6 @@ void on_rom_selected(C8_State *cpu_state, char *romFile) {
     load_controller_config(romFile);
 }
 
-void execute_rom(C8_State *cpu_state, struct controller_data controllers) {
-    C8_execute_program(cpu_state);
-
-    display_context_t disp;
-    if (cpu_state->draw == 1) {
-        while (!(disp = display_get()));
-        draw_display(cpu_state, disp);
-        display_show(disp);
-        cpu_state->draw = 0;
-    }
-
-    // Update key states
-    controllers = get_keys_pressed();
-    update_button_states(cpu_state, key_map, controllers);
-
-    // Start menu
-    controllers = get_keys_down();
-    if (controllers.c[0].start) {
-        state = ROM_SELECT;
-    }
-}
-
 int main(void) {
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
     console_init();
@@ -213,7 +166,9 @@ int main(void) {
                 }
                 break;
             case EXECUTE_ROM:
-                execute_rom(&cpu_state, controllers);
+                if (execute_rom(&cpu_state, controllers, &key_map)) {
+                    state = ROM_SELECT;
+                }
                 break;
             default:
                 printf("Unsupported state: %d\n", state);
