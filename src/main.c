@@ -59,28 +59,6 @@ void draw_display(C8_State *state, display_context_t disp) {
     }
 }
 
-void store_binding(char *name, KeyMap *key_map) {
-    // Create and allocate memory for an 32-byte buffer
-    uint8_t *buffer = malloc(32 * sizeof(uint8_t));
-    // Use the first 16 bytes to store the filename
-    for (int i = 0; i < 16; i++) {
-        buffer[i] = name[i];
-    }
-    // Use the second 16 bytes to store the keymap
-    for (int i = 0; i < 16; i++) {
-        buffer[i + 16] = key_map->key[i];
-    }
-    eeprom_write_bytes(buffer, 0, 32);
-    free(buffer);
-}
-
-void load_binding(uint8_t *buffer, KeyMap *key_map) {
-    // Use the second 16 bytes to load the keymap
-    for (int i = 0; i < 16; i++) {
-        key_map->key[i] = buffer[i + 16];
-    }
-}
-
 void load_controller_config(char *name) {
     // When running on a flash cart we should probably save to a file
     // For now we save to eeprom
@@ -103,7 +81,7 @@ void load_controller_config(char *name) {
     }
     if (matches) {
         printf("Matches\n");
-        load_binding(buffer, &key_map);
+        load_key_map(buffer, &key_map);
         state = EXECUTE_ROM;
     } else {
         printf("No match\n");
@@ -230,7 +208,7 @@ int main(void) {
                 break;
             case CONTROLLER_SETUP:
                 if (execute_controller_config(&key_map)) {
-                    store_binding(selected_rom_name, &key_map);
+                    store_key_map(selected_rom_name, &key_map);
                     state = EXECUTE_ROM;
                 }
                 break;

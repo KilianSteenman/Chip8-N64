@@ -89,3 +89,25 @@ void init_key_map(KeyMap *key_map) {
         key_map->key[i] = KEY_BINDING_NOT_SET;
     }
 }
+
+void store_key_map(char *name, KeyMap *key_map) {
+    // Create and allocate memory for an 32-byte buffer
+    uint8_t *buffer = malloc(32 * sizeof(uint8_t));
+    // Use the first 16 bytes to store the filename
+    for (int i = 0; i < 16; i++) {
+        buffer[i] = name[i];
+    }
+    // Use the second 16 bytes to store the keymap
+    for (int i = 0; i < 16; i++) {
+        buffer[i + 16] = key_map->key[i];
+    }
+    eeprom_write_bytes(buffer, 0, 32);
+    free(buffer);
+}
+
+void load_key_map(uint8_t *buffer, KeyMap *key_map) {
+    // Use the second 16 bytes to load the keymap
+    for (int i = 0; i < 16; i++) {
+        key_map->key[i] = buffer[i + 16];
+    }
+}

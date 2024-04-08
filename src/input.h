@@ -42,4 +42,8 @@ void set_key_binding(KeyMap *key_map, int key, int controller_index, int button_
 
 void init_key_map(KeyMap *key_map);
 
+void store_key_map(char *name, KeyMap *key_map);
+
+void load_key_map(uint8_t *buffer, KeyMap *key_map);
+
 #endif //CHIP_8_INPUT_H
