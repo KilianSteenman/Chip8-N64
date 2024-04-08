@@ -13,7 +13,8 @@ $(BUILD_DIR)/file_utils.o \
 $(BUILD_DIR)/chip8.o \
 $(BUILD_DIR)/rom.o \
 $(BUILD_DIR)/input.o \
-$(BUILD_DIR)/screen_rom_select.o
+$(BUILD_DIR)/screen_rom_select.o \
+$(BUILD_DIR)/screen_controller_config.o
 
 chip-8.z64: N64_ROM_TITLE="Chip-8"
 chip-8.z64: $(BUILD_DIR)/chip-8.dfs

@@ -6,6 +6,7 @@
 #include "file_utils.h"
 #include "chip8.h"
 #include "input.h"
+#include "screen_controller_config.h"
 #include "screen_rom_select.h"
 
 #define SCREEN_WIDTH 64
@@ -181,71 +182,6 @@ void on_rom_selected(C8_State *cpu_state, char *romFile) {
     load_controller_config(romFile);
 }
 
-int selected_button_index = 0;
-int is_in_config_mode = 0;
-
-void execute_controller_config() {
-    console_set_render_mode(RENDER_MANUAL);
-    console_clear();
-    printf("controller config\n");
-    printf("Input\tController\tButton\n");
-    for (int i = 0; i < sizeof(key_map.key); i++) {
-        if (key_map.key[i] == KEY_BINDING_NOT_SET) {
-            if (i == selected_button_index) {
-                printf("- %X\t\t%s\t\t\t%s\n", i, "-", "-");
-            } else {
-                printf("  %X\t\t%s\t\t\t%s\n", i, "-", "-");
-            }
-        } else {
-            int controller_index = key_map.key[i] & 0xF;
-            int button_index = key_map.key[i] >> 4;
-
-            if (i == selected_button_index) {
-                printf("- %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
-            } else {
-                printf("  %X\t\t%d\t\t\t%s\n", i, controller_index, button_names[button_index]);
-            }
-        }
-    }
-
-    if (is_in_config_mode == 0) {
-        struct controller_data controllers = get_keys_down();
-        if (controllers.c[0].up) {
-            if (--selected_button_index < 0) {
-                selected_button_index = 0;
-            }
-        }
-
-        if (controllers.c[0].down) {
-            if (++selected_button_index > 0xF) {
-                selected_button_index = 0xF;
-            }
-        }
-
-        if (controllers.c[0].A) {
-            is_in_config_mode = 1;
-        }
-
-        if (controllers.c[0].start) {
-            store_binding(selected_rom_name, &key_map);
-            state = GAME;
-        }
-    } else {
-        struct controller_data controllers = get_keys_down();
-        for (int controller_index = 0; controller_index < 4; controller_index++) {
-            for (int button_index = 0; button_index < 12; button_index++) {
-                if (is_button_pressed(controllers, controller_index, button_index)) {
-                    set_key_binding(&key_map, selected_button_index, controller_index, button_index);
-                    is_in_config_mode = 0;
-                    break;
-                }
-            }
-        }
-    }
-
-    console_render();
-}
-
 void execute_game(C8_State *cpu_state, struct controller_data controllers) {
     C8_execute_program(cpu_state);
 
@@ -300,12 +236,15 @@ int main(void) {
         switch (state) {
             case GAME_SELECT:
                 int rom_count = sizeof(romFiles) / sizeof(romFiles[0]);
-                if(execute_rom_select(romFiles, rom_count, &selected_game_index)) {
+                if (execute_rom_select(romFiles, rom_count, &selected_game_index)) {
                     on_rom_selected(&cpu_state, romFiles[selected_game_index]);
                 }
                 break;
             case CONTROLLER_SETUP:
-                execute_controller_config();
+                if (execute_controller_config(&key_map)) {
+                    store_binding(selected_rom_name, &key_map);
+                    state = GAME;
+                }
                 break;
             case GAME:
                 execute_game(&cpu_state, controllers);
