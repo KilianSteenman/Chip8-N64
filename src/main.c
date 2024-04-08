@@ -15,12 +15,12 @@
 #define GRID_SCALE 1
 
 typedef enum {
-    GAME_SELECT,
+    ROM_SELECT,
     CONTROLLER_SETUP,
-    GAME,
+    EXECUTE_ROM,
 } State;
 
-State state = GAME_SELECT;
+State state = ROM_SELECT;
 char *selected_rom_name;
 
 KeyMap key_map;
@@ -116,7 +116,7 @@ void load_controller_config(char *name) {
     if (matches) {
         printf("Matches\n");
         load_binding(buffer, &key_map);
-        state = GAME;
+        state = EXECUTE_ROM;
     } else {
         printf("No match\n");
         state = CONTROLLER_SETUP;
@@ -182,7 +182,7 @@ void on_rom_selected(C8_State *cpu_state, char *romFile) {
     load_controller_config(romFile);
 }
 
-void execute_game(C8_State *cpu_state, struct controller_data controllers) {
+void execute_rom(C8_State *cpu_state, struct controller_data controllers) {
     C8_execute_program(cpu_state);
 
     display_context_t disp;
@@ -200,7 +200,7 @@ void execute_game(C8_State *cpu_state, struct controller_data controllers) {
     // Start menu
     controllers = get_keys_down();
     if (controllers.c[0].start) {
-        state = GAME_SELECT;
+        state = ROM_SELECT;
     }
 }
 
@@ -234,7 +234,7 @@ int main(void) {
         controller_scan();
 
         switch (state) {
-            case GAME_SELECT:
+            case ROM_SELECT:
                 int rom_count = sizeof(romFiles) / sizeof(romFiles[0]);
                 if (execute_rom_select(romFiles, rom_count, &selected_game_index)) {
                     on_rom_selected(&cpu_state, romFiles[selected_game_index]);
@@ -243,11 +243,11 @@ int main(void) {
             case CONTROLLER_SETUP:
                 if (execute_controller_config(&key_map)) {
                     store_binding(selected_rom_name, &key_map);
-                    state = GAME;
+                    state = EXECUTE_ROM;
                 }
                 break;
-            case GAME:
-                execute_game(&cpu_state, controllers);
+            case EXECUTE_ROM:
+                execute_rom(&cpu_state, controllers);
                 break;
             default:
                 printf("Unsupported state: %d\n", state);
