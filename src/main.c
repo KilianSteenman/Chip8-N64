@@ -9,6 +9,7 @@
 #include "screen_controller_config.h"
 #include "screen_rom_select.h"
 #include "screen_rom_execution.h"
+#include "sha1.h"
 
 typedef enum {
     ROM_SELECT,
@@ -21,7 +22,7 @@ char *selected_rom_name;
 
 KeyMap key_map;
 
-char romFiles[8][30] = {
+char romFiles[9][30] = {
         "rom://1-chip8-logo.ch8",
         "rom://2-ibm-logo.ch8",
         "rom://3-corax+.ch8",
@@ -29,6 +30,7 @@ char romFiles[8][30] = {
         "rom://6-keypad.ch8",
         "rom://BC_test.ch8",
         "rom://Tetris.ch8",
+        "rom://SpaceInvaders.ch8",
         "rom://Pong.ch8"
 };
 
@@ -69,8 +71,11 @@ void load_controller_config(char *name) {
 }
 
 Rom *load_rom(char *name) {
+    console_set_render_mode(RENDER_AUTOMATIC);
+    console_clear();
+
     FILE *romFile;
-    char *buffer;
+    uint8_t *buffer;
     long fileLength;
 
     romFile = fopen(name, "r");
@@ -84,19 +89,30 @@ Rom *load_rom(char *name) {
     fileLength = getFileSize(romFile);
 
     // Allocate memory for the buffer to store file contents
-    buffer = (char *) malloc(fileLength);
+    buffer = (uint8_t *) malloc(fileLength);
     if (buffer == NULL) {
         perror("Memory allocation failed");
         fclose(romFile);
         return NULL;
     }
-    printf("Allocated rom\nFile memory %ld\n", fileLength);
+    printf("Allocated memory %ld\n", fileLength);
 
     // Read file contents into the buffer
     fread(buffer, 1, fileLength, romFile);
 
     // Cleanup
     fclose(romFile);
+
+    uint8_t hash[20];
+    char hexHash[41];
+    sha1digest(hash, hexHash, buffer, fileLength);
+    printf("SHA-1 hash: ");
+    for (int i = 0; i < 20; ++i) {
+        printf("%02x", hash[i]);
+    }
+    printf("\n");
+    printf("Digest\n%s yay\n", hexHash);
+    while(1) {}
 
     Rom *rom = malloc(sizeof(Rom));
     rom->buffer = buffer;

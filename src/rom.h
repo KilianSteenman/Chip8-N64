@@ -6,7 +6,7 @@
 #define CHIP_8_ROM_H
 
 typedef struct {
-    char *buffer;
+    uint8_t *buffer;
     long fileLength;
 } Rom;
 
