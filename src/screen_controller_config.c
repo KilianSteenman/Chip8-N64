@@ -56,6 +56,8 @@ bool execute_controller_config(KeyMap *key_map) {
 
         return controllers.c[0].start;
     } else {
+        printf("\nPress a button\n");
+
         // Wait for button input
         struct controller_data controllers = get_keys_down();
         for (int controller_index = 0; controller_index < 4; controller_index++) {
@@ -67,6 +69,7 @@ bool execute_controller_config(KeyMap *key_map) {
                 }
             }
         }
+        console_render();
     }
 
     return false;

@@ -103,17 +103,6 @@ Rom *load_rom(char *name) {
     // Cleanup
     fclose(romFile);
 
-    uint8_t hash[20];
-    char hexHash[41];
-    sha1digest(hash, hexHash, buffer, fileLength);
-    printf("SHA-1 hash: ");
-    for (int i = 0; i < 20; ++i) {
-        printf("%02x", hash[i]);
-    }
-    printf("\n");
-    printf("Digest\n%s yay\n", hexHash);
-    while(1) {}
-
     Rom *rom = malloc(sizeof(Rom));
     rom->buffer = buffer;
     rom->fileLength = fileLength;
@@ -127,10 +116,26 @@ void on_rom_selected(C8_State *cpu_state, char *romFile) {
     selected_rom_name = romFile;
     printf("Loading rom %s\n", romFile);
 
+    // Load rom
     Rom *rom = load_rom(romFile);
     if (rom == NULL) {
         printf("Unable to load rom!\n");
         return;
+    }
+
+    // Try to load config
+    uint8_t hash[20];
+    char hexHash[41];
+    sha1digest(hash, hexHash, rom->buffer, rom->fileLength);
+    printf("Sha1: %s\n", hexHash);
+    FILE *configFile = fopen(hexHash, "r");
+    if (configFile == NULL) {
+        printf("No config found for %s\n", hexHash);
+        init_key_map(&key_map);
+        state = CONTROLLER_SETUP;
+        return;
+    } else {
+        // Load the controller config
     }
 
     C8_load_program(cpu_state, rom);
@@ -164,6 +169,9 @@ int main(void) {
     C8_State cpu_state;
     printf("Initializing C8\n");
     C8_init(&cpu_state);
+
+    // Init keymap
+    init_key_map(&key_map);
 
     while (1) {
         controller_scan();
