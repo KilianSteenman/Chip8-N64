@@ -179,7 +179,6 @@ int main(void) {
                 break;
             case CONTROLLER_SETUP:
                 if (execute_controller_config(&key_map)) {
-                    store_key_map(selected_rom_name, &key_map);
                     state = EXECUTE_ROM;
                 }
                 break;
