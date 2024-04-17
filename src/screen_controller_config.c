@@ -52,6 +52,11 @@ bool execute_controller_config(KeyMap *key_map) {
         if (controllers.c[0].A) {
             is_in_config_mode = 1;
         }
+
+        for(int i = 0; i < 16; i++) {
+            printf("%02x ", key_map->key[i]);
+        }
+
         console_render();
 
         return controllers.c[0].start;

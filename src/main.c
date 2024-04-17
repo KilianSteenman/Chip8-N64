@@ -36,40 +36,6 @@ char romFiles[9][30] = {
 
 int selected_game_index = 0;
 
-void load_controller_config(char *name) {
-    // When running on a flash cart we should probably save to a file
-    // For now we save to eeprom
-
-    // Create and allocate memory for an 32-byte buffer
-    uint8_t *buffer = malloc(32 * sizeof(uint8_t));
-
-    // Load the data from block 0 to the buffer
-    eeprom_read_bytes(buffer, 0, 32);
-    printf("\n");
-    for (int i = 0; i < 32; i++) {
-        printf("%x ", buffer[i]);
-    }
-    printf("\n");
-    bool matches = true;
-    for (int i = 0; i < 16; i++) {
-        if (buffer[i] != name[i]) {
-            matches = false;
-        }
-    }
-    if (matches) {
-        printf("Matches\n");
-        load_key_map(buffer, &key_map);
-        state = EXECUTE_ROM;
-    } else {
-        printf("No match\n");
-        state = CONTROLLER_SETUP;
-        init_key_map(&key_map);
-        selected_rom_name = name;
-    }
-
-    free(buffer);
-}
-
 Rom *load_rom(char *name) {
     console_set_render_mode(RENDER_AUTOMATIC);
     console_clear();
@@ -128,20 +94,48 @@ void on_rom_selected(C8_State *cpu_state, char *romFile) {
     char hexHash[41];
     sha1digest(hash, hexHash, rom->buffer, rom->fileLength);
     printf("Sha1: %s\n", hexHash);
-    FILE *configFile = fopen(hexHash, "r");
+    char configFileName[52];
+    sprintf(configFileName, "rom://%s.c864", hexHash);
+    FILE *configFile = fopen(configFileName, "r");
     if (configFile == NULL) {
         printf("No config found for %s\n", hexHash);
         init_key_map(&key_map);
         state = CONTROLLER_SETUP;
         return;
-    } else {
-        // Load the controller config
     }
 
+    // Load the controller config
+    printf("Loading config\n");
+    init_key_map(&key_map);
+    uint8_t *configBuffer;
+    long fileLength;
+
+    // Get the size of the config file
+    fileLength = getFileSize(configFile);
+
+    // Allocate memory for the buffer to store file contents
+    configBuffer = (uint8_t *) malloc(fileLength);
+    if (configBuffer == NULL) {
+        perror("Memory allocation failed");
+        fclose(configFile);
+        return;
+    }
+    fread(configBuffer, 1, fileLength, configFile);
+    fclose(configFile);
+
+    printf("Loading key map\n");
+    load_key_map(configBuffer, &key_map);
+    free(configBuffer);
+
+    printf("KeyMap:\n");
+    for(int i = 0; i < 16; i++) {
+        printf("%02x ", key_map.key[i]);
+    }
+
+    C8_init(cpu_state);
     C8_load_program(cpu_state, rom);
     free(rom);
-
-    load_controller_config(romFile);
+    state = EXECUTE_ROM;
 }
 
 int main(void) {

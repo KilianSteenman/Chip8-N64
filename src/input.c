@@ -108,6 +108,6 @@ void store_key_map(char *name, KeyMap *key_map) {
 void load_key_map(uint8_t *buffer, KeyMap *key_map) {
     // Use the second 16 bytes to load the keymap
     for (int i = 0; i < 16; i++) {
-        key_map->key[i] = buffer[i + 16];
+        key_map->key[i] = buffer[i];
     }
 }
